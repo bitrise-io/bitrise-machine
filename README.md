@@ -1,2 +1,1 @@
-# bitrise-machine
-Bitrise Machine - manage hosts
+# Bitrise Machine - manage bitrise CLI runner hosts
