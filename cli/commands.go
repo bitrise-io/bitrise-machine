@@ -3,6 +3,11 @@ package cli
 import "github.com/codegangsta/cli"
 
 const (
+	// WorkdirEnvKey ...
+	WorkdirEnvKey = "BITRISE_MACHINE_WORKDIR"
+	// WorkdirKey ...
+	WorkdirKey = "workdir"
+
 	// LogLevelEnvKey ...
 	LogLevelEnvKey = "LOGLEVEL"
 	// LogLevelKey ...
@@ -22,8 +27,18 @@ var (
 	commands = []cli.Command{
 		{
 			Name:   "setup",
-			Usage:  "",
+			Usage:  "Setup/initialize the Host.",
 			Action: setup,
+		},
+		{
+			Name:   "run",
+			Usage:  "Run command on a Host - have to be initialized with setup first!",
+			Action: run,
+		},
+		{
+			Name:   "cleanup",
+			Usage:  "Cleanup the Host.",
+			Action: cleanup,
 		},
 	}
 
@@ -33,6 +48,12 @@ var (
 			Value:  "info",
 			Usage:  "Log level (options: debug, info, warn, error, fatal, panic).",
 			EnvVar: LogLevelEnvKey,
+		},
+		cli.StringFlag{
+			Name:   WorkdirKey,
+			Value:  "",
+			Usage:  "Working & config directory path.",
+			EnvVar: WorkdirEnvKey,
 		},
 	}
 )

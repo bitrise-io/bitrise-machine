@@ -5,7 +5,7 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-func setup(c *cli.Context) {
+func run(c *cli.Context) {
 
-	log.Infoln("Setup")
+	log.Infoln("Run")
 }

@@ -9,12 +9,24 @@ import (
 	"github.com/codegangsta/cli"
 )
 
+var (
+	// MachineWorkdir ...
+	MachineWorkdir = ""
+)
+
 func before(c *cli.Context) error {
 	// Log level
 	if logLevel, err := log.ParseLevel(c.String(LogLevelKey)); err != nil {
-		log.Fatal("[BITRISE_CLI] - Failed to parse log level:", err)
+		log.Fatal("Failed to parse log level:", err)
 	} else {
 		log.SetLevel(logLevel)
+	}
+
+	if len(c.Args()) != 0 && !c.Bool(HelpKey) && !c.Bool(VersionKey) {
+		MachineWorkdir = c.String(WorkdirKey)
+		if MachineWorkdir == "" {
+			log.Fatalln("No Workdir specified!")
+		}
 	}
 
 	return nil
