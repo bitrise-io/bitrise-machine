@@ -7,6 +7,48 @@ app:
   - GITHUB_RELEASES_URL: https://github.com/bitrise-io/${BITRISE_BIN_NAME}/releases
 
 workflows:
+
+  _test:
+    steps:
+    - script:
+        title: Godeps - GOPATH patch
+        inputs:
+        - content: |-
+            set -e
+            set -v
+            envman add --key ORIG_GOPATH --value "$GOPATH"
+            envman add --key GOPATH --value "$(godep path):$GOPATH"
+    - script:
+        title: Go Test
+        inputs:
+        - content: godep go test ./...
+    - script:
+        title: Err check
+        inputs:
+        - content: errcheck -asserts=true -blank=true $(godep go list ./...)
+    - script:
+        title: Go Lint
+        inputs:
+        - content: golint
+    - script:
+        title: Restore original GOPATH
+        inputs:
+        - content: envman add --key GOPATH --value "$ORIG_GOPATH"
+
+  install:
+    before_run:
+    - _test
+    steps:
+    - script:
+        title: Test & install
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -v
+            set -e
+
+            go install
+
   godeps-update:
     steps:
     - script:
@@ -20,6 +62,9 @@ workflows:
             godep save
 
   ci:
+    after_run:
+    - _test
+    - _notifications
     steps:
     - script:
         title: Install required testing tools
@@ -37,22 +82,9 @@ workflows:
 
             # Go lint
             go get -u github.com/golang/lint/golint
-    - script:
-        title: Godeps - GOPATH patch
-        inputs:
-        - content: envman add --key GOPATH --value "$(godep path):$GOPATH"
-    - script:
-        title: Go Test
-        inputs:
-        - content: godep go test ./...
-    - script:
-        title: Err check
-        inputs:
-        - content: errcheck -asserts=true -blank=true $(godep go list ./...)
-    - script:
-        title: Go Lint
-        inputs:
-        - content: golint
+
+  _notifications:
+    steps:
     - slack:
         run_if: .IsCI
         inputs:

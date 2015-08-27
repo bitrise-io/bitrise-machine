@@ -16,16 +16,30 @@ func doCleanup(configModel config.MachineConfigModel) error {
 		if err := cmdex.RunCommandInDir(MachineWorkdir, "vagrant", "sandbox", "rollback"); err != nil {
 			return err
 		}
-		return nil
+	} else {
+		return fmt.Errorf("Unsupported CleanupMode: %s", configModel.CleanupMode)
 	}
 
-	if err := config.DeleteSSHConfigFileFromDir(MachineWorkdir); err != nil {
-		return fmt.Errorf("Failed to delete SSH Configuration file: %s", err)
+	if err := config.DeleteSSHFilesFromDir(MachineWorkdir); err != nil {
+		return fmt.Errorf("Failed to delete SSH file from workdir: %s", err)
 	}
 
-	return fmt.Errorf("Unsupported CleanupMode: %s", configModel.CleanupMode)
+	return nil
 }
 
 func cleanup(c *cli.Context) {
 	log.Infoln("Cleanup")
+
+	configModel, err := config.ReadMachineConfigFileFromDir(MachineWorkdir)
+	if err != nil {
+		log.Fatalln("Failed to read Config file: ", err)
+	}
+
+	log.Infof("configModel: %#v", configModel)
+
+	if err := doCleanup(configModel); err != nil {
+		log.Fatalf("Failed to Cleanup: %s", err)
+	}
+
+	log.Infoln("Cleanup - DONE - OK")
 }

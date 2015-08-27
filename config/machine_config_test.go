@@ -1,15 +1,12 @@
 package config
 
-import (
-	"testing"
-
-	"github.com/bitrise-io/go-utils/pointers"
-)
+import "testing"
 
 func Test_readMachineConfigFromBytes(t *testing.T) {
 	configContent := `{
 "cleanup_mode": "rollback",
-"is_cleanup_before_setup": false
+"is_cleanup_before_setup": false,
+"is_do_timesync_at_setup": true
 }`
 
 	t.Log("configContent: ", configContent)
@@ -22,7 +19,7 @@ func Test_readMachineConfigFromBytes(t *testing.T) {
 	if configModel.CleanupMode != "rollback" {
 		t.Fatal("Invalid CleanupMode!")
 	}
-	if configModel.IsCleanupBeforeSetup == nil || *configModel.IsCleanupBeforeSetup != false {
+	if configModel.IsCleanupBeforeSetup != false {
 		t.Fatal("Invalid IsCleanupBeforeSetup!")
 	}
 }
@@ -34,21 +31,20 @@ func Test_MachineConfigModel_normalizeAndValidate(t *testing.T) {
 		t.Fatal("Should return a validation error!")
 	}
 
-	configModel = MachineConfigModel{CleanupMode: CleanupModeRollback}
-	t.Logf("Default IsCleanupBeforeSetup: %#v", configModel)
-	if err := configModel.normalizeAndValidate(); err != nil {
-		t.Fatalf("Failed with error: %s", err)
-	}
-	if *configModel.IsCleanupBeforeSetup != true {
-		t.Fatal("Invalid IsCleanupBeforeSetup - default value check")
+	configModel = MachineConfigModel{
+		CleanupMode:          CleanupModeRollback,
+		IsCleanupBeforeSetup: true,
+		IsDoTimesyncAtSetup:  false,
 	}
 
-	configModel = MachineConfigModel{CleanupMode: CleanupModeRollback, IsCleanupBeforeSetup: pointers.NewBoolPtr(false)}
-	t.Logf("IsCleanupBeforeSetup=false: %#v", configModel)
+	t.Logf("configModel: %#v", configModel)
 	if err := configModel.normalizeAndValidate(); err != nil {
 		t.Fatalf("Failed with error: %s", err)
 	}
-	if *configModel.IsCleanupBeforeSetup != false {
+	if configModel.IsCleanupBeforeSetup != true {
 		t.Fatal("Invalid IsCleanupBeforeSetup")
+	}
+	if configModel.IsDoTimesyncAtSetup != false {
+		t.Fatal("Invalid IsDoTimesyncAtSetup")
 	}
 }

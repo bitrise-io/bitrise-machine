@@ -17,40 +17,59 @@ func doSetupSSH(configModel config.MachineConfigModel) (config.SSHConfigModel, e
 	log.Infoln("==> doSetupSSH")
 	sshConfigModel := config.SSHConfigModel{}
 
-	//
+	// Read `vagrant ssh-config` log/output
 	outputs, err := cmdex.RunCommandInDirAndReturnCombinedStdoutAndStderr(MachineWorkdir, "vagrant", "ssh-config")
 	if err != nil {
 		log.Errorf("'vagrant ssh-config' failed with output: %s", outputs)
 		return sshConfigModel, err
 	}
 
+	// Convert `vagrant ssh-config` to our SSHConfigModel
 	sshConfigModel, err = config.CreateSSHConfigFromVagrantSSHConfigLog(outputs)
 	if err != nil {
 		log.Errorf("'vagrant ssh-config' returned an invalid output (failed to scan SSH Config): %s", outputs)
 		return sshConfigModel, err
 	}
 
-	if err := sshConfigModel.WriteIntoFileInDir(MachineWorkdir); err != nil {
-		return sshConfigModel, err
-	}
-
-	sshConfigModel, err = config.ReadSSHConfigFileFromDir(MachineWorkdir)
+	// Generate SSH Keypair
+	privBytes, pubBytes, err := utils.GenerateSSHKeypair()
 	if err != nil {
 		return sshConfigModel, err
 	}
 
-	log.Fatalln("--> IMPLEMENT SSH KEY HANDLING!!")
+	// Write the SSH Keypair to file
+	privKeyFilePth, _, err := config.WriteSSHKeypairToFiles(MachineWorkdir, privBytes, pubBytes)
+	if err != nil {
+		return sshConfigModel, err
+	}
+
+	// Replace the ~/.ssh/authorized_keys inside the VM to only allow
+	//  the new keypair
+	replaceAuthKeysCmd := fmt.Sprintf(`printf "%s" > ~/.ssh/authorized_keys`, pubBytes)
+	if err := utils.RunCommandThroughSSH(sshConfigModel, replaceAuthKeysCmd); err != nil {
+		return sshConfigModel, err
+	}
+
+	// Save private key as the new identity
+	sshConfigModel.IdentityPath = privKeyFilePth
+	if err := sshConfigModel.WriteIntoFileInDir(MachineWorkdir); err != nil {
+		return sshConfigModel, err
+	}
 
 	return sshConfigModel, nil
 }
 
+// doTimesync generates an appropriately formatted
+//  time string, then calls `sudo date` through SSH
+// This is required for Virtual Machines which are
+//  simply rolled back to a snapshot state which might
+//  mess up the VM's time (restores it to the snapshot time)
 func doTimesync(sshConfigModel config.SSHConfigModel) error {
 	log.Infoln("==> doTimesync")
 
 	const layout = "2006-01-02 15:04:05 MST"
 	timeNow := time.Now()
 	timeAsString := timeNow.UTC().Format(layout)
-	log.Infoln(" (debug) timeAsString: ", timeAsString)
 	timeSyncCmd := fmt.Sprintf("%s %s",
 		`sudo date -uf "%Y-%m-%d %H:%M:%S UTC"`,
 		`"`+timeAsString+`"`)
@@ -60,10 +79,6 @@ func doTimesync(sshConfigModel config.SSHConfigModel) error {
 		return err
 	}
 
-	// if err := bitruncommon.RunCommandThroughSSHWithWriters([]string{timeSyncCmd},
-	// 	prov.sshConfig, logStreamerOut, logStreamerErr, prov.IsVerbose); err != nil {
-	// 	return err
-	// }
 	return nil
 }
 
@@ -86,7 +101,7 @@ func setup(c *cli.Context) {
 	log.Infof("configModel: %#v", configModel)
 
 	// doCleanup
-	if *configModel.IsCleanupBeforeSetup {
+	if configModel.IsCleanupBeforeSetup {
 		if err := doCleanup(configModel); err != nil {
 			log.Fatalf("Failed to Cleanup: %s", err)
 		}
@@ -99,8 +114,10 @@ func setup(c *cli.Context) {
 	}
 
 	// time sync
-	if err := doTimesync(sshConfigModel); err != nil {
-		log.Fatalf("Failed to do Time Sync: %s", err)
+	if configModel.IsDoTimesyncAtSetup {
+		if err := doTimesync(sshConfigModel); err != nil {
+			log.Fatalf("Failed to do Time Sync: %s", err)
+		}
 	}
 
 	log.Infoln("=> Setup DONE - OK")

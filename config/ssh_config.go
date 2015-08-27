@@ -13,7 +13,9 @@ import (
 )
 
 const (
-	sshConfigFileName = "bitrise.machine.ssh.json"
+	sshConfigFileName     = "bitrise.machine.ssh.json"
+	sshPrivateKeyFileName = "ssh_rsa"
+	sshPublicKeyFileName  = "ssh_rsa.pub"
 )
 
 // SSHConfigModel ...
@@ -26,6 +28,14 @@ type SSHConfigModel struct {
 
 func fullSSHConfigFilePath(dirPath string) string {
 	return path.Join(dirPath, sshConfigFileName)
+}
+
+func fullSSHPrivateKeyFilePath(dirPath string) string {
+	return path.Join(dirPath, sshPrivateKeyFileName)
+}
+
+func fullSSHPublicKeyFilePath(dirPath string) string {
+	return path.Join(dirPath, sshPublicKeyFileName)
 }
 
 func (model *SSHConfigModel) normalizeAndValidate() error {
@@ -59,17 +69,30 @@ func readSSHConfigFromBytes(configBytes []byte) (SSHConfigModel, error) {
 	return model, nil
 }
 
-// DeleteSSHConfigFileFromDir ...
-func DeleteSSHConfigFileFromDir(workdirPth string) error {
-	fullConfPath := fullSSHConfigFilePath(workdirPth)
-	isExists, err := pathutil.IsPathExists(fullConfPath)
+func deleteFileIfExists(pth string) error {
+	isExists, err := pathutil.IsPathExists(pth)
 	if err != nil {
 		return err
 	}
 	if !isExists {
 		return nil
 	}
-	return os.Remove(fullConfPath)
+	return os.Remove(pth)
+}
+
+// DeleteSSHFilesFromDir ...
+func DeleteSSHFilesFromDir(workdirPth string) (e error) {
+	if err := deleteFileIfExists(fullSSHConfigFilePath(workdirPth)); err != nil {
+		e = err
+	}
+	if err := deleteFileIfExists(fullSSHPrivateKeyFilePath(workdirPth)); err != nil {
+		e = err
+	}
+	if err := deleteFileIfExists(fullSSHPublicKeyFilePath(workdirPth)); err != nil {
+		e = err
+	}
+
+	return
 }
 
 // ReadSSHConfigFileFromDir ...
@@ -88,6 +111,10 @@ func (model SSHConfigModel) serializeIntoJSONBytes() ([]byte, error) {
 
 // WriteIntoFileInDir ...
 func (model SSHConfigModel) WriteIntoFileInDir(workdirPth string) error {
+	if err := model.normalizeAndValidate(); err != nil {
+		return err
+	}
+
 	configBytes, err := model.serializeIntoJSONBytes()
 	if err != nil {
 		return err
@@ -140,4 +167,22 @@ func (model SSHConfigModel) SSHCommandArgs() []string {
 		"-l", model.Loginname, "-i", model.IdentityPath,
 	}
 	return sshArgs
+}
+
+// WriteSSHKeypairToFiles ...
+func WriteSSHKeypairToFiles(workdirPth string, privBytes, pubBytes []byte) (privFilePath, pubFilePath string, e error) {
+	privFilePath = fullSSHPrivateKeyFilePath(workdirPth)
+	pubFilePath = fullSSHPublicKeyFilePath(workdirPth)
+
+	if err := fileutil.WriteBytesToFileWithPermission(privFilePath, privBytes, 0600); err != nil {
+		e = err
+		return
+	}
+
+	if err := fileutil.WriteBytesToFileWithPermission(pubFilePath, pubBytes, 0600); err != nil {
+		e = err
+		return
+	}
+
+	return
 }

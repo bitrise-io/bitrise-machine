@@ -6,7 +6,6 @@ import (
 	"path"
 
 	"github.com/bitrise-io/go-utils/fileutil"
-	"github.com/bitrise-io/go-utils/pointers"
 )
 
 const (
@@ -21,16 +20,13 @@ const (
 // MachineConfigModel ...
 type MachineConfigModel struct {
 	CleanupMode          string `json:"cleanup_mode"`
-	IsCleanupBeforeSetup *bool  `json:"is_cleanup_before_setup"`
+	IsCleanupBeforeSetup bool   `json:"is_cleanup_before_setup"`
+	IsDoTimesyncAtSetup  bool   `json:"is_do_timesync_at_setup"`
 }
 
 func (configModel *MachineConfigModel) normalizeAndValidate() error {
 	if configModel.CleanupMode != CleanupModeRollback && configModel.CleanupMode != CleanupModeRecreate {
 		return fmt.Errorf("Invalid CleanupMode: %s", configModel.CleanupMode)
-	}
-
-	if configModel.IsCleanupBeforeSetup == nil {
-		configModel.IsCleanupBeforeSetup = pointers.NewBoolPtr(true)
 	}
 
 	return nil
