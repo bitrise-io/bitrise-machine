@@ -31,9 +31,10 @@ var (
 			Action: setup,
 		},
 		{
-			Name:   "run",
-			Usage:  "Run command on a Host - have to be initialized with setup first!",
-			Action: run,
+			Name:            "run",
+			Usage:           "Run command on a Host - have to be initialized with setup first!",
+			Action:          run,
+			SkipFlagParsing: true,
 		},
 		{
 			Name:   "cleanup",
