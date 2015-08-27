@@ -9,24 +9,32 @@
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/cmdex",
-			"Rev": "de1f96dd2d5d114ef8bb378e85bae6eec2f598a9"
+			"Rev": "7cc4f2865477d667b2b7bd42569a1a9c7f67afc8"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/fileutil",
-			"Rev": "de1f96dd2d5d114ef8bb378e85bae6eec2f598a9"
+			"Rev": "7cc4f2865477d667b2b7bd42569a1a9c7f67afc8"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/pathutil",
-			"Rev": "de1f96dd2d5d114ef8bb378e85bae6eec2f598a9"
+			"Rev": "7cc4f2865477d667b2b7bd42569a1a9c7f67afc8"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/pointers",
-			"Rev": "de1f96dd2d5d114ef8bb378e85bae6eec2f598a9"
+			"Rev": "7cc4f2865477d667b2b7bd42569a1a9c7f67afc8"
 		},
 		{
 			"ImportPath": "github.com/codegangsta/cli",
 			"Comment": "1.2.0-135-gf998261",
 			"Rev": "f9982619ccace7df963bb7f6d1de3a6f014ff709"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/curve25519",
+			"Rev": "81bf7719a6b7ce9b665598222362b50122dfc13b"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh",
+			"Rev": "81bf7719a6b7ce9b665598222362b50122dfc13b"
 		}
 	]
 }
