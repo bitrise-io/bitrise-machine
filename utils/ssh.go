@@ -5,6 +5,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"io"
 	"os"
 	"os/exec"
 
@@ -13,17 +14,22 @@ import (
 	"github.com/bitrise-io/bitrise-machine/config"
 )
 
-// RunCommandThroughSSH ...
-func RunCommandThroughSSH(sshConfigModel config.SSHConfigModel, cmdToRunWithSSH string) error {
+// RunCommandThroughSSHWithWriters ...
+func RunCommandThroughSSHWithWriters(sshConfigModel config.SSHConfigModel, cmdToRunWithSSH string, stdout, stderr io.Writer) error {
 	sshArgs := sshConfigModel.SSHCommandArgs()
 	fullArgs := append(sshArgs, cmdToRunWithSSH)
 
 	cmd := exec.Command("ssh", fullArgs...)
 	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
 
 	return cmd.Run()
+}
+
+// RunCommandThroughSSH ...
+func RunCommandThroughSSH(sshConfigModel config.SSHConfigModel, cmdToRunWithSSH string) error {
+	return RunCommandThroughSSHWithWriters(sshConfigModel, cmdToRunWithSSH, os.Stdout, os.Stderr)
 }
 
 // GenerateSSHKeypair ...

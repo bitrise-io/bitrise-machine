@@ -21,6 +21,13 @@ const (
 	// VersionKey ...
 	VersionKey      = "version"
 	versionKeyShort = "v"
+
+	// --- Command flags
+
+	// TimeoutFlagKey ...
+	TimeoutFlagKey = "timeout"
+	// LogFormatFlagKey ...
+	LogFormatFlagKey = "logformat"
 )
 
 var (
@@ -35,6 +42,18 @@ var (
 			Usage:           "Run command on a Host - have to be initialized with setup first!",
 			Action:          run,
 			SkipFlagParsing: true,
+			Flags: []cli.Flag{
+				cli.IntFlag{
+					Name:  TimeoutFlagKey,
+					Value: 0,
+					Usage: "Timeout, in seconds",
+				},
+				cli.StringFlag{
+					Name:  LogFormatFlagKey,
+					Value: "",
+					Usage: "Log format for the executed command's output. Default is 'no transform'. Options: json",
+				},
+			},
 		},
 		{
 			Name:   "cleanup",
