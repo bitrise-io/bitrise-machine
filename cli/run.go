@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	logChunkRuneLenght = 1
+	logChunkRuneLenght = 100
 
 	// LogFormatJSON ...
 	LogFormatJSON = "json"
@@ -74,37 +74,51 @@ type LogChunkModel struct {
 	Pos  int64  `json:"pos"`
 }
 
-func logChunkJSONTransform(logChunkData string) ([]byte, error) {
+func logChunkJSONTransform(logChunkData string, logChunkIdx int64) ([]byte, error) {
 	logChunk := LogChunkModel{
 		Data: logChunkData,
+		Pos:  logChunkIdx,
 	}
 	return json.Marshal(logChunk)
 }
 
 func performRun(sshConfig config.SSHConfigModel, commandToRunStr string, timeoutSeconds int64, logFormat string) RunResults {
 	logBuff := LogBuffer{}
+	var logChunkIndex int64
+	lastLogChunkSentAt := time.Now()
 
 	// Log processing
-	processLogs := func(isFlush bool) {
+	processLogs := func(isFlush bool) (isLogChunkGenerated bool) {
 		for {
-			chunkStr, isEOF := logBuff.ReadRunes(logChunkRuneLenght)
-			if chunkStr != "" {
-				if logFormat == LogFormatJSON {
-					logChunkBytes, err := logChunkJSONTransform(chunkStr)
-					if err != nil {
-						log.Errorf("Failed to convert log chunk. Error: %s", err)
-						log.Errorf(" Log chunk was: %s", chunkStr)
+			isChunkDone := false
+			if logBuff.logBytes.Len() > logChunkRuneLenght || isFlush {
+				chunkStr, isEOF := logBuff.ReadRunes(logChunkRuneLenght)
+				if chunkStr != "" {
+					if logFormat == LogFormatJSON {
+						logChunkBytes, err := logChunkJSONTransform(chunkStr, logChunkIndex)
+						logChunkIndex++
+						if err != nil {
+							log.Errorf("Failed to convert log chunk. Error: %s", err)
+							log.Errorf(" Log chunk was: %s", chunkStr)
+						}
+						fmt.Printf("%s\n", logChunkBytes)
+					} else {
+						fmt.Printf("%s", chunkStr)
 					}
-					fmt.Printf("%s\n", logChunkBytes)
-				} else {
-					fmt.Printf("%s", chunkStr)
+					isLogChunkGenerated = true
 				}
+				if isEOF {
+					isChunkDone = true
+				}
+			} else {
+				isChunkDone = true
 			}
 
-			if !isFlush || isEOF {
+			if !isFlush || isChunkDone {
 				break
 			}
 		}
+		return
 	}
 
 	// Run
@@ -142,7 +156,17 @@ func performRun(sshConfig config.SSHConfigModel, commandToRunStr string, timeout
 			runRes = RunResults{RunError: fmt.Errorf("Timeout after %d seconds", timeoutSeconds), IsTimeoutError: true}
 			isRunFinished = true
 		case <-time.Tick(100 * time.Millisecond):
-			processLogs(true)
+			isFlushLogs := false
+			// force flush logs if we did not generated log chunks in the last
+			//  couple of seconds - if the process did not generate enough logs
+			//  to trigger a chunk generation
+			timeDiffSec := time.Now().Sub(lastLogChunkSentAt).Seconds()
+			if timeDiffSec > 5.0 {
+				isFlushLogs = true
+			}
+			if processLogs(isFlushLogs) || isFlushLogs {
+				lastLogChunkSentAt = time.Now()
+			}
 		}
 	}
 
