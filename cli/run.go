@@ -17,7 +17,9 @@ import (
 )
 
 const (
-	logChunkRuneLenght = 100
+	logChunkRuneLenght             = 10000 // ~ 10 KB
+	buildFinishedWithErrorExitCode = 10
+	buildAbortedByTimeoutExitCode  = 2
 
 	// LogFormatJSON ...
 	LogFormatJSON = "json"
@@ -219,10 +221,10 @@ func run(c *cli.Context) {
 	if runResult.RunError != nil {
 		if runResult.IsTimeoutError {
 			log.Errorf("[!] Timeout: %s", runResult.RunError)
-			os.Exit(2)
+			os.Exit(buildAbortedByTimeoutExitCode)
 		} else {
 			log.Errorf("Run failed: %s", runResult.RunError)
-			os.Exit(1)
+			os.Exit(buildFinishedWithErrorExitCode)
 		}
 	}
 
