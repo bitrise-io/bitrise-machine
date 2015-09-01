@@ -138,3 +138,7 @@ workflows:
               f.write(changelog_content)
             end
         - runner_bin: ruby
+    - script:
+        title: Open _bin folder
+        inputs:
+        - content: open _bin

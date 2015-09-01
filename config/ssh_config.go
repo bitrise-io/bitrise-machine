@@ -186,3 +186,19 @@ func WriteSSHKeypairToFiles(workdirPth string, privBytes, pubBytes []byte) (priv
 
 	return
 }
+
+// IsSSHKeypairFileExistInDirectory ...
+func IsSSHKeypairFileExistInDirectory(workdirPth string) bool {
+	privFilePath := fullSSHPrivateKeyFilePath(workdirPth)
+	pubFilePath := fullSSHPublicKeyFilePath(workdirPth)
+
+	exists, err := pathutil.IsPathExists(privFilePath)
+	if !exists || err != nil {
+		return false
+	}
+	exists, err = pathutil.IsPathExists(pubFilePath)
+	if !exists || err != nil {
+		return false
+	}
+	return true
+}

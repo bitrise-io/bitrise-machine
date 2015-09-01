@@ -28,6 +28,8 @@ const (
 	TimeoutFlagKey = "timeout"
 	// LogFormatFlagKey ...
 	LogFormatFlagKey = "logformat"
+	// ForceFlagKey ...
+	ForceFlagKey = "force"
 )
 
 var (
@@ -36,6 +38,12 @@ var (
 			Name:   "setup",
 			Usage:  "Setup/initialize the Host.",
 			Action: setup,
+			Flags: []cli.Flag{
+				cli.BoolFlag{
+					Name:  ForceFlagKey,
+					Usage: "Force setup",
+				},
+			},
 		},
 		{
 			Name:            "run",

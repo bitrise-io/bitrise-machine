@@ -100,20 +100,32 @@ func setup(c *cli.Context) {
 
 	log.Infof("configModel: %#v", configModel)
 
-	// doCleanup
-	if configModel.IsCleanupBeforeSetup {
-		if err := doCleanup(configModel); err != nil {
-			log.Fatalf("Failed to Cleanup: %s", err)
+	isSkipSetups := false
+	if config.IsSSHKeypairFileExistInDirectory(MachineWorkdir) && !c.Bool(ForceFlagKey) {
+		log.Info("Host is already prepared and no --force flag was specified, skipping setup.")
+		isSkipSetups = true
+	}
+
+	if !isSkipSetups {
+		// doCleanup
+		if configModel.IsCleanupBeforeSetup {
+			if err := doCleanup(configModel); err != nil {
+				log.Fatalf("Failed to Cleanup: %s", err)
+			}
+		}
+
+		// ssh
+		_, err := doSetupSSH(configModel)
+		if err != nil {
+			log.Fatalf("Failed to Setup SSH: %s", err)
 		}
 	}
 
-	// ssh
-	sshConfigModel, err := doSetupSSH(configModel)
-	if err != nil {
-		log.Fatalf("Failed to Setup SSH: %s", err)
-	}
-
 	// time sync
+	sshConfigModel, err := config.ReadSSHConfigFileFromDir(MachineWorkdir)
+	if err != nil {
+		log.Fatalf("Failed to read SSH Config file! Error: %s", err)
+	}
 	if configModel.IsDoTimesyncAtSetup {
 		if err := doTimesync(sshConfigModel); err != nil {
 			log.Fatalf("Failed to do Time Sync: %s", err)
