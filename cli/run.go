@@ -163,7 +163,7 @@ func performRun(sshConfig config.SSHConfigModel, commandToRunStr string, timeout
 			//  couple of seconds - if the process did not generate enough logs
 			//  to trigger a chunk generation
 			timeDiffSec := time.Now().Sub(lastLogChunkSentAt).Seconds()
-			if timeDiffSec > 5.0 {
+			if timeDiffSec > 3.0 {
 				isFlushLogs = true
 			}
 			if processLogs(isFlushLogs) || isFlushLogs {
