@@ -21,6 +21,8 @@ const (
 	buildFinishedWithErrorExitCode = 10
 	buildAbortedByTimeoutExitCode  = 2
 
+	logSummaryMetaInfoID = "/logs/summary"
+
 	// LogFormatJSON ...
 	LogFormatJSON = "json"
 )
@@ -84,6 +86,31 @@ func logChunkJSONTransform(logChunkData string, logChunkIdx int64) ([]byte, erro
 	return json.Marshal(logChunk)
 }
 
+// LogSummaryModel ...
+type LogSummaryModel struct {
+	GeneratedChunkCount int64 `json:"generated_chunk_count"`
+}
+
+func printJSONControlMetaInfo(metaInfoID string, metaInfoObj interface{}) error {
+	// format:
+	//  :{{metaInfoID}}:{{metaInfoObj as json}}
+	// ex: :/log/summary:{generated_chunk_count:123}
+
+	metaInfoJSONBytes, err := json.Marshal(metaInfoObj)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("\n:%s:%s\n", metaInfoID, metaInfoJSONBytes)
+	return nil
+}
+
+func printLogSummary(logChunkNum int64) {
+	logSummaryModel := LogSummaryModel{GeneratedChunkCount: logChunkNum}
+	if err := printJSONControlMetaInfo(logSummaryMetaInfoID, logSummaryModel); err != nil {
+		log.Errorf("Failed to generate Log Summary: %s", err)
+	}
+}
+
 func performRun(sshConfig config.SSHConfigModel, commandToRunStr string, timeoutSeconds int64, logFormat string) RunResults {
 	logBuff := LogBuffer{}
 	var logChunkIndex int64
@@ -98,14 +125,16 @@ func performRun(sshConfig config.SSHConfigModel, commandToRunStr string, timeout
 				if chunkStr != "" {
 					if logFormat == LogFormatJSON {
 						logChunkBytes, err := logChunkJSONTransform(chunkStr, logChunkIndex)
-						logChunkIndex++
 						if err != nil {
 							log.Errorf("Failed to convert log chunk. Error: %s", err)
 							log.Errorf(" Log chunk was: %s", chunkStr)
+						} else {
+							fmt.Printf("%s\n", logChunkBytes)
+							logChunkIndex++
 						}
-						fmt.Printf("%s\n", logChunkBytes)
 					} else {
 						fmt.Printf("%s", chunkStr)
+						logChunkIndex++
 					}
 					isLogChunkGenerated = true
 				}
@@ -173,6 +202,7 @@ func performRun(sshConfig config.SSHConfigModel, commandToRunStr string, timeout
 	}
 
 	processLogs(true)
+	printLogSummary(logChunkIndex)
 
 	return runRes
 }
