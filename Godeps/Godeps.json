@@ -1,28 +1,38 @@
 {
 	"ImportPath": "github.com/bitrise-io/bitrise-machine",
-	"GoVersion": "go1.5",
+	"GoVersion": "go1.5.1",
 	"Deps": [
 		{
 			"ImportPath": "github.com/Sirupsen/logrus",
-			"Comment": "v0.8.3-3-g07d998d",
-			"Rev": "07d998d174c4e2dc90e2f1989a20724220bca1ff"
+			"Comment": "v0.8.7",
+			"Rev": "418b41d23a1bf978c06faea5313ba194650ac088"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/cmdex",
-			"Rev": "9ca80b96c6bafd3b1d9223ca15c849fb4875dcd4"
+			"Rev": "42685965d2f7cfa8bf4578971ad8b1dcbc10e770"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/fileutil",
-			"Rev": "9ca80b96c6bafd3b1d9223ca15c849fb4875dcd4"
+			"Rev": "42685965d2f7cfa8bf4578971ad8b1dcbc10e770"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/pathutil",
-			"Rev": "9ca80b96c6bafd3b1d9223ca15c849fb4875dcd4"
+			"Rev": "42685965d2f7cfa8bf4578971ad8b1dcbc10e770"
 		},
 		{
 			"ImportPath": "github.com/codegangsta/cli",
-			"Comment": "1.2.0-135-gf998261",
-			"Rev": "f9982619ccace7df963bb7f6d1de3a6f014ff709"
+			"Comment": "1.2.0-143-ga65b733",
+			"Rev": "a65b733b303f0055f8d324d805f393cd3e7a7904"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/assert",
+			"Comment": "v1.0-42-gb8dc1ce",
+			"Rev": "b8dc1cecf15bdaf1988d9e87aa7cd98d899a06d6"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/require",
+			"Comment": "v1.0-42-gb8dc1ce",
+			"Rev": "b8dc1cecf15bdaf1988d9e87aa7cd98d899a06d6"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/curve25519",
