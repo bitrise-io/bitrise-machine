@@ -7,3 +7,4 @@
 package main
 
 import _ "github.com/stretchr/testify/require"
+import _ "github.com/bitrise-io/go-utils/testutil"

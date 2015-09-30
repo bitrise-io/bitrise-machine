@@ -8,16 +8,24 @@
 			"Rev": "418b41d23a1bf978c06faea5313ba194650ac088"
 		},
 		{
+			"ImportPath": "github.com/bitrise-io/go-utils/builtinutil",
+			"Rev": "618704ff0faedaac2005b88ccaada849e7817367"
+		},
+		{
 			"ImportPath": "github.com/bitrise-io/go-utils/cmdex",
-			"Rev": "42685965d2f7cfa8bf4578971ad8b1dcbc10e770"
+			"Rev": "618704ff0faedaac2005b88ccaada849e7817367"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/fileutil",
-			"Rev": "42685965d2f7cfa8bf4578971ad8b1dcbc10e770"
+			"Rev": "618704ff0faedaac2005b88ccaada849e7817367"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/pathutil",
-			"Rev": "42685965d2f7cfa8bf4578971ad8b1dcbc10e770"
+			"Rev": "618704ff0faedaac2005b88ccaada849e7817367"
+		},
+		{
+			"ImportPath": "github.com/bitrise-io/go-utils/testutil",
+			"Rev": "618704ff0faedaac2005b88ccaada849e7817367"
 		},
 		{
 			"ImportPath": "github.com/codegangsta/cli",
