@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 	"sync"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/bitrise-machine/config"
 	"github.com/bitrise-io/bitrise-machine/utils"
+	"github.com/bitrise-io/go-utils/cmdex"
 	"github.com/codegangsta/cli"
 )
 
@@ -226,7 +226,8 @@ func run(c *cli.Context) {
 		log.Fatalln("Failed to read SSH configs - you should probably call 'setup' first!")
 	}
 
-	fullCmdToRunStr := fmt.Sprintf("%s %s", cmdToRun, strings.Join(cmdToRunArgs, " "))
+	// fullCmdToRunStr := fmt.Sprintf("%s %s", cmdToRun, strings.Join(cmdToRunArgs, " "))
+	fullCmdToRunStr := cmdex.LogPrintableCommandArgs(append([]string{cmdToRun}, cmdToRunArgs...))
 	log.Infoln("fullCmdToRunStr: ", fullCmdToRunStr)
 
 	timeoutSecs := c.Int(TimeoutFlagKey)

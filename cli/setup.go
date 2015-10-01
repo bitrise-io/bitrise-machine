@@ -8,7 +8,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/bitrise-machine/config"
 	"github.com/bitrise-io/bitrise-machine/utils"
-	"github.com/bitrise-io/go-utils/cmdex"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/codegangsta/cli"
 )
@@ -18,7 +17,7 @@ func doSetupSSH(configModel config.MachineConfigModel) (config.SSHConfigModel, e
 	sshConfigModel := config.SSHConfigModel{}
 
 	// Read `vagrant ssh-config` log/output
-	outputs, err := cmdex.RunCommandInDirAndReturnCombinedStdoutAndStderr(MachineWorkdir, "vagrant", "ssh-config")
+	outputs, err := utils.RunAndReturnCombinedOutput(MachineWorkdir, configModel.Envs.ToCmdEnvs(), "vagrant", "ssh-config")
 	if err != nil {
 		log.Errorf("'vagrant ssh-config' failed with output: %s", outputs)
 		return sshConfigModel, err
@@ -70,6 +69,7 @@ func doTimesync(sshConfigModel config.SSHConfigModel) error {
 	const layout = "2006-01-02 15:04:05 MST"
 	timeNow := time.Now()
 	timeAsString := timeNow.UTC().Format(layout)
+	// THIS ONLY WORKS ON OSX VM!!
 	timeSyncCmd := fmt.Sprintf("%s %s",
 		`sudo date -uf "%Y-%m-%d %H:%M:%S UTC"`,
 		`"`+timeAsString+`"`)

@@ -1,6 +1,25 @@
 package config
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/bitrise-io/go-utils/testutil"
+	"github.com/stretchr/testify/require"
+)
+
+func Test_EnvItemsModel_ToCmdEnvs(t *testing.T) {
+	empty := EnvItemsModel{}
+	require.Equal(t, []string{}, empty.ToCmdEnvs())
+
+	one := EnvItemsModel{"key": "value"}
+	require.Equal(t, []string{"key=value"}, one.ToCmdEnvs())
+
+	two := EnvItemsModel{"key1": "value 1", "key2": "value 2"}
+	testutil.EqualSlicesWithoutOrder(t, []string{"key1=value 1", "key2=value 2"}, two.ToCmdEnvs())
+
+	envRef := EnvItemsModel{"key": "value with $HOME env ref"}
+	require.Equal(t, []string{"key=value with $HOME env ref"}, envRef.ToCmdEnvs())
+}
 
 func Test_readMachineConfigFromBytes(t *testing.T) {
 	configContent := `{
