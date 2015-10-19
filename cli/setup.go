@@ -109,7 +109,7 @@ func setup(c *cli.Context) {
 	if !isSkipSetups {
 		// doCleanup
 		if configModel.IsCleanupBeforeSetup {
-			if err := doCleanup(configModel); err != nil {
+			if err := doCleanup(configModel, ""); err != nil {
 				log.Fatalf("Failed to Cleanup: %s", err)
 			}
 		}

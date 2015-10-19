@@ -30,7 +30,7 @@ func doRecreateCleanup(configModel config.MachineConfigModel) error {
 	if machineStatus.Data != "not_created" {
 		// destroy
 		log.Infoln("Destroying machine...")
-		if err := utils.Run(MachineWorkdir, configModel.Envs.ToCmdEnvs(), "vagrant", "destroy", "-f"); err != nil {
+		if err := doDestroy(configModel); err != nil {
 			return fmt.Errorf("'vagrant destroy' failed with error: %s", err)
 		}
 		log.Infoln("Machine destroyed.")
@@ -86,23 +86,30 @@ func doCustomCleanup(configModel config.MachineConfigModel) error {
 	return nil
 }
 
-func doCleanup(configModel config.MachineConfigModel) error {
+// doCleanup ...
+// @isSkipHostCleanup : !!! should only be specified in case the host will be destroyed right after
+//   the cleanup. 'will-be-destroyed' will leave the host as-it-is, uncleared!!
+func doCleanup(configModel config.MachineConfigModel, isSkipHostCleanup string) error {
 	log.Infof("==> doCleanup (mode: %s)", configModel.CleanupMode)
 
-	if configModel.CleanupMode == config.CleanupModeRollback {
-		if err := utils.Run(MachineWorkdir, configModel.Envs.ToCmdEnvs(), "vagrant", "sandbox", "rollback"); err != nil {
-			return err
-		}
-	} else if configModel.CleanupMode == config.CleanupModeRecreate {
-		if err := doRecreateCleanup(configModel); err != nil {
-			return err
-		}
-	} else if configModel.CleanupMode == config.CleanupModeCustomCommand {
-		if err := doCustomCleanup(configModel); err != nil {
-			return err
+	if isSkipHostCleanup != "will-be-destroyed" {
+		if configModel.CleanupMode == config.CleanupModeRollback {
+			if err := utils.Run(MachineWorkdir, configModel.Envs.ToCmdEnvs(), "vagrant", "sandbox", "rollback"); err != nil {
+				return err
+			}
+		} else if configModel.CleanupMode == config.CleanupModeRecreate {
+			if err := doRecreateCleanup(configModel); err != nil {
+				return err
+			}
+		} else if configModel.CleanupMode == config.CleanupModeCustomCommand {
+			if err := doCustomCleanup(configModel); err != nil {
+				return err
+			}
+		} else {
+			return fmt.Errorf("Unsupported CleanupMode: %s", configModel.CleanupMode)
 		}
 	} else {
-		return fmt.Errorf("Unsupported CleanupMode: %s", configModel.CleanupMode)
+		log.Warnln("Skipping Host Cleanup! This option should only be used if the Host is destroyed immediately after this cleanup!!")
 	}
 
 	if err := config.DeleteSSHFilesFromDir(MachineWorkdir); err != nil {
@@ -122,7 +129,7 @@ func cleanup(c *cli.Context) {
 
 	log.Infof("configModel: %#v", configModel)
 
-	if err := doCleanup(configModel); err != nil {
+	if err := doCleanup(configModel, ""); err != nil {
 		log.Fatalf("Failed to Cleanup: %s", err)
 	}
 

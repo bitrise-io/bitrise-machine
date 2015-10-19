@@ -46,6 +46,11 @@ var (
 			},
 		},
 		{
+			Name:   "destroy",
+			Usage:  "Destroy the Host.",
+			Action: destroy,
+		},
+		{
 			Name:            "run",
 			Usage:           "Run command on a Host - have to be initialized with setup first!",
 			Action:          run,
