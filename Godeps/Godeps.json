@@ -4,43 +4,43 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/Sirupsen/logrus",
-			"Comment": "v0.8.7",
-			"Rev": "418b41d23a1bf978c06faea5313ba194650ac088"
+			"Comment": "v0.8.7-30-g4643a7e",
+			"Rev": "4643a7efec9b8fd7548882e7b30095711343100f"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/builtinutil",
-			"Rev": "847b25c573f2bba34f57880510672c3c9ffda083"
+			"Rev": "88a07029055e857fa11aa29dfdfdfd37c540e242"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/cmdex",
-			"Rev": "847b25c573f2bba34f57880510672c3c9ffda083"
+			"Rev": "88a07029055e857fa11aa29dfdfdfd37c540e242"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/fileutil",
-			"Rev": "847b25c573f2bba34f57880510672c3c9ffda083"
+			"Rev": "88a07029055e857fa11aa29dfdfdfd37c540e242"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/pathutil",
-			"Rev": "847b25c573f2bba34f57880510672c3c9ffda083"
+			"Rev": "88a07029055e857fa11aa29dfdfdfd37c540e242"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/testutil",
-			"Rev": "847b25c573f2bba34f57880510672c3c9ffda083"
+			"Rev": "88a07029055e857fa11aa29dfdfdfd37c540e242"
 		},
 		{
 			"ImportPath": "github.com/codegangsta/cli",
-			"Comment": "1.2.0-143-ga65b733",
-			"Rev": "a65b733b303f0055f8d324d805f393cd3e7a7904"
+			"Comment": "1.2.0-159-gcffab77",
+			"Rev": "cffab77ecb4f963ced9e30344eb2b9282ef36887"
 		},
 		{
 			"ImportPath": "github.com/stretchr/testify/assert",
-			"Comment": "v1.0-42-gb8dc1ce",
-			"Rev": "b8dc1cecf15bdaf1988d9e87aa7cd98d899a06d6"
+			"Comment": "v1.0-51-gf3960ab",
+			"Rev": "f3960ab1f9664ecc4e27c78af27cc9063d745a43"
 		},
 		{
 			"ImportPath": "github.com/stretchr/testify/require",
-			"Comment": "v1.0-42-gb8dc1ce",
-			"Rev": "b8dc1cecf15bdaf1988d9e87aa7cd98d899a06d6"
+			"Comment": "v1.0-51-gf3960ab",
+			"Rev": "f3960ab1f9664ecc4e27c78af27cc9063d745a43"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/curve25519",
