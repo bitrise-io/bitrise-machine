@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"sync"
 	"time"
@@ -17,9 +18,12 @@ import (
 )
 
 const (
-	logChunkRuneLenght             = 10000 // ~ 10 KB
-	buildFinishedWithErrorExitCode = 10
-	buildAbortedByTimeoutExitCode  = 2
+	logChunkRuneLenght         = 10000 // ~ 10 KB
+	abortCheckFrequencySeconds = 10.0
+
+	buildFinishedWithErrorExitCode    = 10
+	buildAbortedByTimeoutExitCode     = 2
+	buildAbortedByUserRequestExitCode = 3
 
 	logSummaryMetaInfoID = "/logs/summary"
 
@@ -29,8 +33,9 @@ const (
 
 // RunResults ...
 type RunResults struct {
-	IsTimeoutError bool
-	RunError       error
+	IsTimeoutError       bool
+	IsUserRequestedAbort bool
+	RunError             error
 }
 
 // LogBuffer ...
@@ -111,7 +116,31 @@ func printLogSummary(logChunkNum int64) {
 	}
 }
 
-func performRun(sshConfig config.SSHConfigModel, commandToRunStr string, timeoutSeconds int64, logFormat string) RunResults {
+// AbortCheckModel ...
+type AbortCheckModel struct {
+	StatusStr    string `json:"status"`
+	IsAborted    bool   `json:"is_aborted"`
+	ErrorMessage string `json:"error_msg"`
+}
+
+func requestGetJSON(url string, target interface{}) error {
+	r, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err := r.Body.Close(); err != nil {
+			log.Println(" [!] Failed to close r.Body:", err)
+		}
+	}()
+
+	return json.NewDecoder(r.Body).Decode(target)
+}
+
+func performRun(sshConfig config.SSHConfigModel, commandToRunStr string,
+	timeoutSeconds int64, abortCheckURL string, logFormat string,
+) RunResults {
+
 	logBuff := LogBuffer{}
 	var logChunkIndex int64
 	lastLogChunkSentAt := time.Now()
@@ -174,6 +203,45 @@ func performRun(sshConfig config.SSHConfigModel, commandToRunStr string, timeout
 		timeoutTriggerred = time.After(time.Duration(timeoutSeconds) * time.Second)
 	}
 
+	logTickFn := func() {
+		isFlushLogs := false
+		// force flush logs if we did not generated log chunks in the last
+		//  couple of seconds - if the process did not generate enough logs
+		//  to trigger a chunk generation
+		timeDiffSec := time.Now().Sub(lastLogChunkSentAt).Seconds()
+		if timeDiffSec > 3.0 {
+			isFlushLogs = true
+		}
+		if processLogs(isFlushLogs) || isFlushLogs {
+			lastLogChunkSentAt = time.Now()
+		}
+	}
+
+	lastAbortCheckAt := time.Now()
+	abortCheckTickFN := func() {
+		if abortCheckURL == "" {
+			// no abort check URL defined
+			return
+		}
+		timeDiffSec := time.Now().Sub(lastAbortCheckAt).Seconds()
+		if timeDiffSec < abortCheckFrequencySeconds {
+			return
+		}
+		lastAbortCheckAt = time.Now()
+		log.Debug("=> Abort check")
+
+		abortCheckModel := AbortCheckModel{}
+		jsonErr := requestGetJSON(
+			abortCheckURL,
+			&abortCheckModel)
+		log.Debugf("==> Result: %#v | err: %s", abortCheckModel, jsonErr)
+
+		if jsonErr == nil && abortCheckModel.StatusStr == "ok" && abortCheckModel.IsAborted {
+			runRes = RunResults{RunError: fmt.Errorf("Build was aborted"), IsUserRequestedAbort: true}
+			isRunFinished = true
+		}
+	}
+
 	for !isRunFinished {
 		select {
 		case res := <-c1:
@@ -187,17 +255,8 @@ func performRun(sshConfig config.SSHConfigModel, commandToRunStr string, timeout
 			runRes = RunResults{RunError: fmt.Errorf("Timeout after %d seconds", timeoutSeconds), IsTimeoutError: true}
 			isRunFinished = true
 		case <-time.Tick(100 * time.Millisecond):
-			isFlushLogs := false
-			// force flush logs if we did not generated log chunks in the last
-			//  couple of seconds - if the process did not generate enough logs
-			//  to trigger a chunk generation
-			timeDiffSec := time.Now().Sub(lastLogChunkSentAt).Seconds()
-			if timeDiffSec > 3.0 {
-				isFlushLogs = true
-			}
-			if processLogs(isFlushLogs) || isFlushLogs {
-				lastLogChunkSentAt = time.Now()
-			}
+			logTickFn()
+			abortCheckTickFN()
 		}
 	}
 
@@ -238,6 +297,13 @@ func run(c *cli.Context) {
 		timeoutSecs = 0
 	}
 
+	abortCheckURL := c.String(AbortCheckURLFlagKey)
+	if abortCheckURL != "" {
+		log.Infof("Abort check URL: %s", abortCheckURL)
+	} else {
+		log.Infoln("No abort-check-URL defined.")
+	}
+
 	logFormat := c.String(LogFormatFlagKey)
 	if logFormat == "json" {
 		log.Infof("Log format: %s", logFormat)
@@ -248,11 +314,14 @@ func run(c *cli.Context) {
 		logFormat = ""
 	}
 
-	runResult := performRun(sshConfigModel, fullCmdToRunStr, int64(timeoutSecs), logFormat)
+	runResult := performRun(sshConfigModel, fullCmdToRunStr, int64(timeoutSecs), abortCheckURL, logFormat)
 	if runResult.RunError != nil {
 		if runResult.IsTimeoutError {
 			log.Errorf("[!] Timeout: %s", runResult.RunError)
 			os.Exit(buildAbortedByTimeoutExitCode)
+		} else if runResult.IsUserRequestedAbort {
+			log.Errorf("[!] User requested abort: %s", runResult.RunError)
+			os.Exit(buildAbortedByUserRequestExitCode)
 		} else {
 			log.Errorf("Run failed: %s", runResult.RunError)
 			os.Exit(buildFinishedWithErrorExitCode)

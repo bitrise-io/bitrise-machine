@@ -26,6 +26,8 @@ const (
 
 	// TimeoutFlagKey ...
 	TimeoutFlagKey = "timeout"
+	// AbortCheckURLFlagKey ...
+	AbortCheckURLFlagKey = "abort-check-url"
 	// LogFormatFlagKey ...
 	LogFormatFlagKey = "logformat"
 	// ForceFlagKey ...
@@ -65,6 +67,11 @@ var (
 					Name:  LogFormatFlagKey,
 					Value: "",
 					Usage: "Log format for the executed command's output. Default is 'no transform'. Options: json",
+				},
+				cli.StringFlag{
+					Name:  AbortCheckURLFlagKey,
+					Value: "",
+					Usage: "If a URL is provided it'll be checked periodically, and it it returns that the build was aborted bitrise-machine will abort the run.",
 				},
 			},
 		},
