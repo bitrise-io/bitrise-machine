@@ -9,7 +9,7 @@
 To install this version, run the following commands (in a bash shell):
 
 ```
-curl -fL https://github.com/bitrise-io/bitrise-machine/releases/download/{{version}}/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/{{version}}/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
 ```
 
 Then:

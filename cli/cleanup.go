@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/bitrise-io/bitrise-machine/config"
-	"github.com/bitrise-io/bitrise-machine/utils"
-	"github.com/bitrise-io/bitrise-machine/vagrant"
+	"github.com/bitrise-tools/bitrise-machine/config"
+	"github.com/bitrise-tools/bitrise-machine/utils"
+	"github.com/bitrise-tools/bitrise-machine/vagrant"
 	"github.com/codegangsta/cli"
 )
 

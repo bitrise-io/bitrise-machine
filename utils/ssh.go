@@ -11,7 +11,7 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
-	"github.com/bitrise-io/bitrise-machine/config"
+	"github.com/bitrise-tools/bitrise-machine/config"
 )
 
 // RunCommandThroughSSHWithWriters ...
