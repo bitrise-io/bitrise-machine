@@ -6,9 +6,9 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-tools/bitrise-machine/config"
 	"github.com/bitrise-tools/bitrise-machine/utils"
-	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/codegangsta/cli"
 )
 
@@ -22,6 +22,7 @@ func doSetupSSH(configModel config.MachineConfigModel) (config.SSHConfigModel, e
 		log.Errorf("'vagrant ssh-config' failed with output: %s", outputs)
 		return sshConfigModel, err
 	}
+	log.Debugln("===> (raw) vagrant ssh-config retrieved")
 
 	// Convert `vagrant ssh-config` to our SSHConfigModel
 	sshConfigModel, err = config.CreateSSHConfigFromVagrantSSHConfigLog(outputs)
@@ -29,32 +30,39 @@ func doSetupSSH(configModel config.MachineConfigModel) (config.SSHConfigModel, e
 		log.Errorf("'vagrant ssh-config' returned an invalid output (failed to scan SSH Config): %s", outputs)
 		return sshConfigModel, err
 	}
+	log.Debugln("===> vagrant ssh-config parsed")
 
 	// Generate SSH Keypair
 	privBytes, pubBytes, err := utils.GenerateSSHKeypair()
 	if err != nil {
 		return sshConfigModel, err
 	}
+	log.Debugln("===> SSH Keypair generated")
 
 	// Write the SSH Keypair to file
 	privKeyFilePth, _, err := config.WriteSSHKeypairToFiles(MachineWorkdir, privBytes, pubBytes)
 	if err != nil {
 		return sshConfigModel, err
 	}
+	log.Debugln("===> SSH Keypair written to file")
 
 	// Replace the ~/.ssh/authorized_keys inside the VM to only allow
 	//  the new keypair
 	replaceAuthKeysCmd := fmt.Sprintf(`printf "%s" > ~/.ssh/authorized_keys`, pubBytes)
+	log.Debugf("===> Running command through SSH: %s", replaceAuthKeysCmd)
 	if err := utils.RunCommandThroughSSH(sshConfigModel, replaceAuthKeysCmd); err != nil {
 		return sshConfigModel, err
 	}
+	log.Debugln("===> SSH Keypair is now authorized to access the VM")
 
 	// Save private key as the new identity
 	sshConfigModel.IdentityPath = privKeyFilePth
 	if err := sshConfigModel.WriteIntoFileInDir(MachineWorkdir); err != nil {
 		return sshConfigModel, err
 	}
+	log.Debugln("===> New identity (private SSH key) saved into config in workdir")
 
+	log.Debugln("==> doSetupSSH [done]")
 	return sshConfigModel, nil
 }
 
