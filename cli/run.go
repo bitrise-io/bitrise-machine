@@ -11,9 +11,9 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/bitrise-io/go-utils/cmdex"
 	"github.com/bitrise-tools/bitrise-machine/config"
 	"github.com/bitrise-tools/bitrise-machine/utils"
-	"github.com/bitrise-io/go-utils/cmdex"
 	"github.com/codegangsta/cli"
 )
 
@@ -274,6 +274,7 @@ func run(c *cli.Context) {
 	}
 
 	inCmdArgs := c.Args()
+	log.Debugf("inCmdArgs: %v", inCmdArgs)
 	cmdToRun := inCmdArgs[0]
 	cmdToRunArgs := []string{}
 	if len(inCmdArgs) > 1 {

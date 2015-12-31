@@ -56,7 +56,7 @@ var (
 			Name:            "run",
 			Usage:           "Run command on a Host - have to be initialized with setup first!",
 			Action:          run,
-			SkipFlagParsing: true,
+			SkipFlagParsing: false,
 			Flags: []cli.Flag{
 				cli.IntFlag{
 					Name:  TimeoutFlagKey,
