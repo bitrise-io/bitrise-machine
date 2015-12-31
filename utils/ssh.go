@@ -11,6 +11,7 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-tools/bitrise-machine/config"
 )
 
@@ -20,6 +21,7 @@ func RunCommandThroughSSHWithWriters(sshConfigModel config.SSHConfigModel, cmdTo
 	fullArgs := append(sshArgs, cmdToRunWithSSH)
 
 	cmd := exec.Command("ssh", fullArgs...)
+	log.Debugf("RunCommandThroughSSHWithWriters: Full command to run: %v", cmd.Args)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
