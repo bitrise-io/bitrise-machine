@@ -135,13 +135,16 @@ func CreateSSHConfigFromVagrantSSHConfigLog(vagrantSSHConfigLog string) (SSHConf
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 		lineSplits := strings.Split(line, " ")
-		if len(lineSplits) == 2 {
+		if len(lineSplits) >= 2 {
 			if lineSplits[0] == "HostName" {
 				configModel.IP = lineSplits[1]
 			} else if lineSplits[0] == "Port" {
 				configModel.Port = lineSplits[1]
 			} else if lineSplits[0] == "IdentityFile" {
-				configModel.IdentityPath = lineSplits[1]
+				configModel.IdentityPath = strings.Join(lineSplits[1:], " ")
+				// starting with vagrant 1.8.x the IdentityFile path is now
+				//  wrapped in quotation ("..."), we should remove those
+				configModel.IdentityPath = strings.Trim(configModel.IdentityPath, `"`)
 			} else if lineSplits[0] == "User" {
 				configModel.Loginname = lineSplits[1]
 			}

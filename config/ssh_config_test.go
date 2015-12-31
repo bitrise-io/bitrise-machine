@@ -3,6 +3,8 @@ package config
 import (
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func Test_readSSHConfigFromBytes(t *testing.T) {
@@ -72,6 +74,8 @@ func Test_SSHConfigModel_serializeIntoJSONBytes(t *testing.T) {
 }
 
 func Test_CreateSSHConfigFromVagrantSSHConfigLog(t *testing.T) {
+	//
+	t.Log("CreateSSHConfigFromVagrantSSHConfigLog")
 	vagrantSSHConfigOutput := `Host default
   HostName 123.321.123.321
   User vagrant
@@ -83,13 +87,28 @@ func Test_CreateSSHConfigFromVagrantSSHConfigLog(t *testing.T) {
   IdentitiesOnly yes
   LogLevel FATAL
 `
+	sshConfig, err := CreateSSHConfigFromVagrantSSHConfigLog(vagrantSSHConfigOutput)
+	require.NoError(t, err, "Failed to create SSH Config from Vagrant SSH Config Log")
+	require.Equal(t, "/user/home/.vagrant.d/insecure_private_key", sshConfig.IdentityPath)
 
-	t.Log("CreateSSHConfigFromVagrantSSHConfigLog")
-	_, err := CreateSSHConfigFromVagrantSSHConfigLog(vagrantSSHConfigOutput)
-	if err != nil {
-		t.Fatalf("Failed to create SSH Config from Vagrant SSH Config Log: %s", err)
-	}
+	//
+	t.Log(`CreateSSHConfigFromVagrantSSHConfigLog - IdentityFile is wrapped in "" - starting with vagrant 1.8.x`)
+	vagrantSSHConfigOutput = `Host default
+	  HostName 123.321.123.321
+	  User vagrant
+	  Port 123
+	  UserKnownHostsFile /dev/null
+	  StrictHostKeyChecking no
+	  PasswordAuthentication no
+	  IdentityFile "/user/home with space/.vagrant.d/insecure_private_key"
+	  IdentitiesOnly yes
+	  LogLevel FATAL
+	`
+	sshConfig, err = CreateSSHConfigFromVagrantSSHConfigLog(vagrantSSHConfigOutput)
+	require.NoError(t, err, "Failed to create SSH Config from Vagrant SSH Config Log")
+	require.Equal(t, "/user/home with space/.vagrant.d/insecure_private_key", sshConfig.IdentityPath)
 
+	//
 	t.Log("CreateSSHConfigFromVagrantSSHConfigLog - Missing Port")
 	vagrantSSHConfigOutput = `Host default
   HostName 123.321.123.321
@@ -101,10 +120,8 @@ func Test_CreateSSHConfigFromVagrantSSHConfigLog(t *testing.T) {
   IdentitiesOnly yes
   LogLevel FATAL
 `
-	_, err = CreateSSHConfigFromVagrantSSHConfigLog(vagrantSSHConfigOutput)
-	if err == nil {
-		t.Fatal("No error returned - should fail without a valid Port!")
-	}
+	sshConfig, err = CreateSSHConfigFromVagrantSSHConfigLog(vagrantSSHConfigOutput)
+	require.Error(t, err, "No error returned - should fail without a valid Port!")
 }
 
 func Test_SSHConfigModel_SSHCommandArgs(t *testing.T) {
