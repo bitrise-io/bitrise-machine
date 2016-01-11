@@ -39,6 +39,10 @@ func (configModel *MachineConfigModel) normalizeAndValidate() error {
 		return fmt.Errorf("Invalid CleanupMode: %s", configModel.CleanupMode)
 	}
 
+	if configModel.Envs == nil {
+		configModel.Envs = EnvItemsModel{}
+	}
+
 	return nil
 }
 
@@ -72,7 +76,7 @@ func CreateEnvItemsModelFromSlice(envsArr []string) (EnvItemsModel, error) {
 	return envItemsModel, nil
 }
 
-func readMachineConfigFromBytes(configBytes []byte) (MachineConfigModel, error) {
+func readMachineConfigFromBytes(configBytes []byte, appendEnvs EnvItemsModel) (MachineConfigModel, error) {
 	configModel := MachineConfigModel{}
 
 	if err := json.Unmarshal(configBytes, &configModel); err != nil {
@@ -81,6 +85,10 @@ func readMachineConfigFromBytes(configBytes []byte) (MachineConfigModel, error) 
 
 	if err := configModel.normalizeAndValidate(); err != nil {
 		return configModel, err
+	}
+
+	for k, v := range appendEnvs {
+		configModel.Envs[k] = v
 	}
 
 	return configModel, nil
@@ -93,13 +101,9 @@ func ReadMachineConfigFileFromDir(workdirPth string, appendEnvs EnvItemsModel) (
 		return MachineConfigModel{}, fmt.Errorf("ReadMachineConfigFileFromDir: failed to read file: %s", err)
 	}
 
-	machineConfig, err := readMachineConfigFromBytes(configBytes)
+	machineConfig, err := readMachineConfigFromBytes(configBytes, appendEnvs)
 	if err != nil {
 		return MachineConfigModel{}, fmt.Errorf("ReadMachineConfigFileFromDir: failed to parse configuration: %s", err)
-	}
-
-	for k, v := range appendEnvs {
-		machineConfig.Envs[k] = v
 	}
 
 	return machineConfig, nil

@@ -93,7 +93,7 @@ func doTimesync(sshConfigModel config.SSHConfigModel) error {
 func setup(c *cli.Context) {
 	log.Infoln("Setup")
 
-	additionalEnvs, err := config.CreateEnvItemsModelFromSlice(c.StringSlice(EnvironmentParamKey))
+	additionalEnvs, err := config.CreateEnvItemsModelFromSlice(MachineParamsAdditionalEnvs)
 	if err != nil {
 		log.Fatalf("Invalid Environment parameter: %s", err)
 	}

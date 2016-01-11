@@ -29,17 +29,45 @@ func Test_readMachineConfigFromBytes(t *testing.T) {
 }`
 
 	t.Log("configContent: ", configContent)
-	configModel, err := readMachineConfigFromBytes([]byte(configContent))
-	if err != nil {
-		t.Fatalf("Failed to read Config: %s", err)
-	}
-	t.Logf("configModel: %#v", configModel)
 
-	if configModel.CleanupMode != "rollback" {
-		t.Fatal("Invalid CleanupMode!")
+	t.Log("Base Config")
+	{
+		configModel, err := readMachineConfigFromBytes([]byte(configContent), EnvItemsModel{})
+		require.NoError(t, err)
+		t.Logf("configModel: %#v", configModel)
+
+		if configModel.CleanupMode != "rollback" {
+			t.Fatal("Invalid CleanupMode!")
+		}
+		if configModel.IsCleanupBeforeSetup != false {
+			t.Fatal("Invalid IsCleanupBeforeSetup!")
+		}
+
+		require.Equal(t, []string{}, configModel.Envs.ToCmdEnvs())
 	}
-	if configModel.IsCleanupBeforeSetup != false {
-		t.Fatal("Invalid IsCleanupBeforeSetup!")
+
+	t.Log("Additional Env items")
+	{
+		configModel, err := readMachineConfigFromBytes([]byte(configContent), EnvItemsModel{"key": "my value"})
+		require.NoError(t, err)
+		t.Logf("configModel: %#v", configModel)
+		require.Equal(t, EnvItemsModel{"key": "my value"}, configModel.Envs)
+	}
+
+	t.Log("Additional Env items - overwrite a config defined Env")
+	{
+		configContent := `{
+"cleanup_mode": "rollback",
+"is_cleanup_before_setup": false,
+"is_do_timesync_at_setup": true,
+"envs": {
+  "MY_KEY": "config value"
+}
+}`
+		configModel, err := readMachineConfigFromBytes([]byte(configContent), EnvItemsModel{"MY_KEY": "additional env value"})
+		require.NoError(t, err)
+		t.Logf("configModel: %#v", configModel)
+		require.Equal(t, EnvItemsModel{"MY_KEY": "additional env value"}, configModel.Envs)
 	}
 }
 

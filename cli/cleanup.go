@@ -122,10 +122,11 @@ func doCleanup(configModel config.MachineConfigModel, isSkipHostCleanup string) 
 func cleanup(c *cli.Context) {
 	log.Infoln("Cleanup")
 
-	additionalEnvs, err := config.CreateEnvItemsModelFromSlice(c.StringSlice(EnvironmentParamKey))
+	additionalEnvs, err := config.CreateEnvItemsModelFromSlice(MachineParamsAdditionalEnvs)
 	if err != nil {
 		log.Fatalf("Invalid Environment parameter: %s", err)
 	}
+	log.Debugf("additionalEnvs: %#v", additionalEnvs)
 
 	configModel, err := config.ReadMachineConfigFileFromDir(MachineWorkdir, additionalEnvs)
 	if err != nil {

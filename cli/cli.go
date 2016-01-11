@@ -12,6 +12,8 @@ import (
 var (
 	// MachineWorkdir ...
 	MachineWorkdir = ""
+	// MachineParamsAdditionalEnvs ...
+	MachineParamsAdditionalEnvs = []string{}
 )
 
 func before(c *cli.Context) error {
@@ -29,6 +31,9 @@ func before(c *cli.Context) error {
 		}
 	}
 
+	MachineParamsAdditionalEnvs = c.StringSlice(EnvironmentParamKey)
+	log.Debugf("MachineParamsAdditionalEnvs: %#v", MachineParamsAdditionalEnvs)
+
 	return nil
 }
 
@@ -43,7 +48,7 @@ func Run() {
 	app := cli.NewApp()
 	app.Name = path.Base(os.Args[0])
 	app.Usage = "bitrise-machine"
-	app.Version = "0.9.5"
+	app.Version = "0.9.6"
 
 	app.Author = ""
 	app.Email = ""

@@ -24,7 +24,7 @@ func doDestroy(configModel config.MachineConfigModel) error {
 func destroy(c *cli.Context) {
 	log.Infoln("Destroy")
 
-	additionalEnvs, err := config.CreateEnvItemsModelFromSlice(c.StringSlice(EnvironmentParamKey))
+	additionalEnvs, err := config.CreateEnvItemsModelFromSlice(MachineParamsAdditionalEnvs)
 	if err != nil {
 		log.Fatalf("Invalid Environment parameter: %s", err)
 	}
