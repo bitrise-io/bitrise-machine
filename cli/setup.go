@@ -93,7 +93,12 @@ func doTimesync(sshConfigModel config.SSHConfigModel) error {
 func setup(c *cli.Context) {
 	log.Infoln("Setup")
 
-	configModel, err := config.ReadMachineConfigFileFromDir(MachineWorkdir)
+	additionalEnvs, err := config.CreateEnvItemsModelFromSlice(c.StringSlice(EnvironmentParamKey))
+	if err != nil {
+		log.Fatalf("Invalid Environment parameter: %s", err)
+	}
+
+	configModel, err := config.ReadMachineConfigFileFromDir(MachineWorkdir, additionalEnvs)
 	if err != nil {
 		log.Fatalln("Failed to read Config file: ", err)
 	}

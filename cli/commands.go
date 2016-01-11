@@ -14,6 +14,10 @@ const (
 	LogLevelKey      = "loglevel"
 	logLevelKeyShort = "l"
 
+	// EnvironmentParamKey ...
+	EnvironmentParamKey      = "environment"
+	environmentParamKeyShort = "e"
+
 	// HelpKey ...
 	HelpKey      = "help"
 	helpKeyShort = "h"
@@ -94,6 +98,10 @@ var (
 			Value:  "",
 			Usage:  "Working & config directory path.",
 			EnvVar: WorkdirEnvKey,
+		},
+		cli.StringSliceFlag{
+			Name:  EnvironmentParamKey + ", " + environmentParamKeyShort,
+			Usage: "Additional Environment Variables, exposed for the command.",
 		},
 	}
 )

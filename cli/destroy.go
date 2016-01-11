@@ -5,9 +5,9 @@ import (
 	"path"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-tools/bitrise-machine/config"
 	"github.com/bitrise-tools/bitrise-machine/utils"
-	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/codegangsta/cli"
 )
 
@@ -24,7 +24,12 @@ func doDestroy(configModel config.MachineConfigModel) error {
 func destroy(c *cli.Context) {
 	log.Infoln("Destroy")
 
-	configModel, err := config.ReadMachineConfigFileFromDir(MachineWorkdir)
+	additionalEnvs, err := config.CreateEnvItemsModelFromSlice(c.StringSlice(EnvironmentParamKey))
+	if err != nil {
+		log.Fatalf("Invalid Environment parameter: %s", err)
+	}
+
+	configModel, err := config.ReadMachineConfigFileFromDir(MachineWorkdir, additionalEnvs)
 	if err != nil {
 		log.Fatalln("Failed to read Config file: ", err)
 	}

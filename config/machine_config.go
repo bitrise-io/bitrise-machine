@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path"
+	"strings"
 
 	"github.com/bitrise-io/go-utils/fileutil"
 )
@@ -52,6 +53,25 @@ func (envItmsModel *EnvItemsModel) ToCmdEnvs() []string {
 	return res
 }
 
+// CreateEnvItemsModelFromSlice ...
+func CreateEnvItemsModelFromSlice(envsArr []string) (EnvItemsModel, error) {
+	envItemsModel := EnvItemsModel{}
+	for _, aEnvStr := range envsArr {
+		splits := strings.Split(aEnvStr, "=")
+		key := splits[0]
+		if key == "" {
+			return EnvItemsModel{}, fmt.Errorf("Invalid item, empty key. (Parameter was: %s)", aEnvStr)
+		}
+		if len(splits) < 2 {
+			return EnvItemsModel{}, fmt.Errorf("Invalid item, no value defined. Key was: %s", splits[0])
+		}
+
+		value := strings.Join(splits[1:], "=")
+		envItemsModel[key] = value
+	}
+	return envItemsModel, nil
+}
+
 func readMachineConfigFromBytes(configBytes []byte) (MachineConfigModel, error) {
 	configModel := MachineConfigModel{}
 
@@ -67,11 +87,20 @@ func readMachineConfigFromBytes(configBytes []byte) (MachineConfigModel, error) 
 }
 
 // ReadMachineConfigFileFromDir ...
-func ReadMachineConfigFileFromDir(workdirPth string) (MachineConfigModel, error) {
+func ReadMachineConfigFileFromDir(workdirPth string, appendEnvs EnvItemsModel) (MachineConfigModel, error) {
 	configBytes, err := fileutil.ReadBytesFromFile(path.Join(workdirPth, machineConfigFileName))
 	if err != nil {
-		return MachineConfigModel{}, err
+		return MachineConfigModel{}, fmt.Errorf("ReadMachineConfigFileFromDir: failed to read file: %s", err)
 	}
 
-	return readMachineConfigFromBytes(configBytes)
+	machineConfig, err := readMachineConfigFromBytes(configBytes)
+	if err != nil {
+		return MachineConfigModel{}, fmt.Errorf("ReadMachineConfigFileFromDir: failed to parse configuration: %s", err)
+	}
+
+	for k, v := range appendEnvs {
+		machineConfig.Envs[k] = v
+	}
+
+	return machineConfig, nil
 }

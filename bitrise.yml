@@ -84,10 +84,11 @@ workflows:
         inputs:
         - content: |-
             #!/bin/bash
-            set -v
             set -e
+            set -x
+            go get -u ./...
             rm -rf ./Godeps
-            godep save
+            godep save ./...
 
   ci:
     before_run:

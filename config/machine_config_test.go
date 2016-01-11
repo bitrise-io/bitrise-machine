@@ -67,3 +67,36 @@ func Test_MachineConfigModel_normalizeAndValidate(t *testing.T) {
 		t.Fatal("Invalid IsDoTimesyncAtSetup")
 	}
 }
+
+func TestCreateEnvItemsModelFromSlice(t *testing.T) {
+	t.Log("Empty")
+	{
+		envsItmModel, err := CreateEnvItemsModelFromSlice([]string{})
+		require.NoError(t, err)
+		require.Equal(t, EnvItemsModel{}, envsItmModel)
+	}
+
+	t.Log("One item - but invalid, empty")
+	{
+		_, err := CreateEnvItemsModelFromSlice([]string{""})
+		require.EqualError(t, err, "Invalid item, empty key. (Parameter was: )")
+	}
+
+	t.Log("One item - but invalid, value provided but empty key")
+	{
+		_, err := CreateEnvItemsModelFromSlice([]string{"=hello"})
+		require.EqualError(t, err, "Invalid item, empty key. (Parameter was: =hello)")
+	}
+
+	t.Log("One item, no value - error")
+	CreateEnvItemsModelFromSlice([]string{"a"})
+
+	t.Log("One item, with value")
+	CreateEnvItemsModelFromSlice([]string{"a=b"})
+
+	t.Log("One item, with value which includes spaces")
+	CreateEnvItemsModelFromSlice([]string{"a=b c d"})
+
+	t.Log("Multiple values")
+	CreateEnvItemsModelFromSlice([]string{"a=b c d", "1=2 3 4"})
+}
