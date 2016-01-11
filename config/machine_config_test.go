@@ -89,14 +89,43 @@ func TestCreateEnvItemsModelFromSlice(t *testing.T) {
 	}
 
 	t.Log("One item, no value - error")
-	CreateEnvItemsModelFromSlice([]string{"a"})
+	{
+		_, err := CreateEnvItemsModelFromSlice([]string{"a"})
+		require.EqualError(t, err, "Invalid item, no value defined. Key was: a")
+	}
 
 	t.Log("One item, with value")
-	CreateEnvItemsModelFromSlice([]string{"a=b"})
+	{
+		envsItmModel, err := CreateEnvItemsModelFromSlice([]string{"a=b"})
+		require.NoError(t, err)
+		require.Equal(t, EnvItemsModel{"a": "b"}, envsItmModel)
+	}
+
+	t.Log("One item, with empty value")
+	{
+		envsItmModel, err := CreateEnvItemsModelFromSlice([]string{"a="})
+		require.NoError(t, err)
+		require.Equal(t, EnvItemsModel{"a": ""}, envsItmModel)
+	}
 
 	t.Log("One item, with value which includes spaces")
-	CreateEnvItemsModelFromSlice([]string{"a=b c d"})
+	{
+		envsItmModel, err := CreateEnvItemsModelFromSlice([]string{"a=b c  d"})
+		require.NoError(t, err)
+		require.Equal(t, EnvItemsModel{"a": "b c  d"}, envsItmModel)
+	}
+
+	t.Log("One item, with value which includes equal signs")
+	{
+		envsItmModel, err := CreateEnvItemsModelFromSlice([]string{"a=b c=d  =e"})
+		require.NoError(t, err)
+		require.Equal(t, EnvItemsModel{"a": "b c=d  =e"}, envsItmModel)
+	}
 
 	t.Log("Multiple values")
-	CreateEnvItemsModelFromSlice([]string{"a=b c d", "1=2 3 4"})
+	{
+		envsItmModel, err := CreateEnvItemsModelFromSlice([]string{"a=b c d", "1=2 3 4"})
+		require.NoError(t, err)
+		require.Equal(t, EnvItemsModel{"a": "b c d", "1": "2 3 4"}, envsItmModel)
+	}
 }
