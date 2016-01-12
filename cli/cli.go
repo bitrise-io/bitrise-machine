@@ -35,7 +35,9 @@ func before(c *cli.Context) error {
 	}
 	MachineWorkdir.Freeze()
 
-	MachineParamsAdditionalEnvs.Set(c.StringSlice(EnvironmentParamKey))
+	if err := MachineParamsAdditionalEnvs.Set(c.StringSlice(EnvironmentParamKey)); err != nil {
+		log.Fatalf("Failed to set MachineParamsAdditionalEnvs: %s", err)
+	}
 	log.Debugf("MachineParamsAdditionalEnvs: %s", MachineParamsAdditionalEnvs)
 	MachineParamsAdditionalEnvs.Freeze()
 
