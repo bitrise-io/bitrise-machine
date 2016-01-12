@@ -12,23 +12,27 @@
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/builtinutil",
-			"Rev": "4fcde1d26d5ac3f8dcdfe108a134bcfceaf17fdc"
+			"Rev": "7cc73f7e226e57d4b03f38de9b8b4e60685563d8"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/cmdex",
-			"Rev": "4fcde1d26d5ac3f8dcdfe108a134bcfceaf17fdc"
+			"Rev": "7cc73f7e226e57d4b03f38de9b8b4e60685563d8"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/fileutil",
-			"Rev": "4fcde1d26d5ac3f8dcdfe108a134bcfceaf17fdc"
+			"Rev": "7cc73f7e226e57d4b03f38de9b8b4e60685563d8"
+		},
+		{
+			"ImportPath": "github.com/bitrise-io/go-utils/freezable",
+			"Rev": "7cc73f7e226e57d4b03f38de9b8b4e60685563d8"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/pathutil",
-			"Rev": "4fcde1d26d5ac3f8dcdfe108a134bcfceaf17fdc"
+			"Rev": "7cc73f7e226e57d4b03f38de9b8b4e60685563d8"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/testutil",
-			"Rev": "4fcde1d26d5ac3f8dcdfe108a134bcfceaf17fdc"
+			"Rev": "7cc73f7e226e57d4b03f38de9b8b4e60685563d8"
 		},
 		{
 			"ImportPath": "github.com/codegangsta/cli",
@@ -55,11 +59,11 @@
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/curve25519",
-			"Rev": "803f01ea27e23d998825ec085f0d153cac01c828"
+			"Rev": "d67eb63455fa4d6fca5802332d86f1f204017e00"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/ssh",
-			"Rev": "803f01ea27e23d998825ec085f0d153cac01c828"
+			"Rev": "d67eb63455fa4d6fca5802332d86f1f204017e00"
 		},
 		{
 			"ImportPath": "golang.org/x/sys/unix",
