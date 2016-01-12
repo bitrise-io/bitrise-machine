@@ -281,7 +281,7 @@ func run(c *cli.Context) {
 		cmdToRunArgs = inCmdArgs[1:]
 	}
 
-	sshConfigModel, err := config.ReadSSHConfigFileFromDir(MachineWorkdir)
+	sshConfigModel, err := config.ReadSSHConfigFileFromDir(MachineWorkdir.Get())
 	if err != nil {
 		log.Fatalf("Failed to read SSH configs - you should probably call 'setup' first! Error: %s", err)
 	}

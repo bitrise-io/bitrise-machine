@@ -16,6 +16,8 @@ const (
 	CleanupModeRollback = "rollback"
 	// CleanupModeRecreate ...
 	CleanupModeRecreate = "recreate"
+	// CleanupModeDestroy ...
+	CleanupModeDestroy = "destroy"
 	// CleanupModeCustomCommand ...
 	CleanupModeCustomCommand = "custom-command"
 )
@@ -25,17 +27,28 @@ type EnvItemsModel map[string]string
 
 // MachineConfigModel ...
 type MachineConfigModel struct {
-	CleanupMode          string        `json:"cleanup_mode"`
-	IsCleanupBeforeSetup bool          `json:"is_cleanup_before_setup"`
-	IsDoTimesyncAtSetup  bool          `json:"is_do_timesync_at_setup"`
-	CustomCleanupCommand string        `json:"custom_cleanup_command"`
-	Envs                 EnvItemsModel `json:"envs"`
+	CleanupMode string `json:"cleanup_mode"`
+	// IsCleanupBeforeSetup - if true do a cleanup before setup, unless
+	//  if the host is already in "prepared" state
+	// You can force to do a cleanup for every setup if you specify
+	//  the --force flag as well for the setup command.
+	IsCleanupBeforeSetup bool `json:"is_cleanup_before_setup"`
+	// IsAllowVagrantCreateInSetup - if true `vagrant create` will be called
+	//  in Setup in case the VM is not yet created
+	IsAllowVagrantCreateInSetup bool `json:"is_allow_vagrant_create_in_setup"`
+	// IsDoTimesyncAtSetup - OS X only at the moment
+	IsDoTimesyncAtSetup  bool   `json:"is_do_timesync_at_setup"`
+	CustomCleanupCommand string `json:"custom_cleanup_command"`
+	// Envs - these will be set as Environment Variables
+	//  for setup, cleanup and destroy
+	Envs EnvItemsModel `json:"envs"`
 }
 
 func (configModel *MachineConfigModel) normalizeAndValidate() error {
 	if configModel.CleanupMode != CleanupModeRollback &&
 		configModel.CleanupMode != CleanupModeRecreate &&
-		configModel.CleanupMode != CleanupModeCustomCommand {
+		configModel.CleanupMode != CleanupModeCustomCommand &&
+		configModel.CleanupMode != CleanupModeDestroy {
 		return fmt.Errorf("Invalid CleanupMode: %s", configModel.CleanupMode)
 	}
 

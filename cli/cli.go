@@ -6,14 +6,15 @@ import (
 	"path"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/bitrise-io/go-utils/freezable"
 	"github.com/codegangsta/cli"
 )
 
 var (
 	// MachineWorkdir ...
-	MachineWorkdir = ""
+	MachineWorkdir = freezable.String{}
 	// MachineParamsAdditionalEnvs ...
-	MachineParamsAdditionalEnvs = []string{}
+	MachineParamsAdditionalEnvs = freezable.StringSlice{}
 )
 
 func before(c *cli.Context) error {
@@ -25,14 +26,18 @@ func before(c *cli.Context) error {
 	}
 
 	if len(c.Args()) != 0 && !c.Bool(HelpKey) && !c.Bool(VersionKey) {
-		MachineWorkdir = c.String(WorkdirKey)
-		if MachineWorkdir == "" {
+		if err := MachineWorkdir.Set(c.String(WorkdirKey)); err != nil {
+			log.Fatalf("Failed to set MachineWorkdir: %s", err)
+		}
+		if MachineWorkdir.String() == "" {
 			log.Fatalln("No Workdir specified!")
 		}
 	}
+	MachineWorkdir.Freeze()
 
-	MachineParamsAdditionalEnvs = c.StringSlice(EnvironmentParamKey)
-	log.Debugf("MachineParamsAdditionalEnvs: %#v", MachineParamsAdditionalEnvs)
+	MachineParamsAdditionalEnvs.Set(c.StringSlice(EnvironmentParamKey))
+	log.Debugf("MachineParamsAdditionalEnvs: %s", MachineParamsAdditionalEnvs)
+	MachineParamsAdditionalEnvs.Freeze()
 
 	return nil
 }

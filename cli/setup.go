@@ -17,7 +17,7 @@ func doSetupSSH(configModel config.MachineConfigModel) (config.SSHConfigModel, e
 	sshConfigModel := config.SSHConfigModel{}
 
 	// Read `vagrant ssh-config` log/output
-	outputs, err := utils.RunAndReturnCombinedOutput(MachineWorkdir, configModel.Envs.ToCmdEnvs(), "vagrant", "ssh-config")
+	outputs, err := utils.RunAndReturnCombinedOutput(MachineWorkdir.Get(), configModel.Envs.ToCmdEnvs(), "vagrant", "ssh-config")
 	if err != nil {
 		log.Errorf("'vagrant ssh-config' failed with output: %s", outputs)
 		return sshConfigModel, err
@@ -40,7 +40,7 @@ func doSetupSSH(configModel config.MachineConfigModel) (config.SSHConfigModel, e
 	log.Debugln("===> SSH Keypair generated")
 
 	// Write the SSH Keypair to file
-	privKeyFilePth, _, err := config.WriteSSHKeypairToFiles(MachineWorkdir, privBytes, pubBytes)
+	privKeyFilePth, _, err := config.WriteSSHKeypairToFiles(MachineWorkdir.Get(), privBytes, pubBytes)
 	if err != nil {
 		return sshConfigModel, err
 	}
@@ -57,7 +57,7 @@ func doSetupSSH(configModel config.MachineConfigModel) (config.SSHConfigModel, e
 
 	// Save private key as the new identity
 	sshConfigModel.IdentityPath = privKeyFilePth
-	if err := sshConfigModel.WriteIntoFileInDir(MachineWorkdir); err != nil {
+	if err := sshConfigModel.WriteIntoFileInDir(MachineWorkdir.Get()); err != nil {
 		return sshConfigModel, err
 	}
 	log.Debugln("===> New identity (private SSH key) saved into config in workdir")
@@ -90,20 +90,41 @@ func doTimesync(sshConfigModel config.SSHConfigModel) error {
 	return nil
 }
 
+func doCreateIfRequired(configModel config.MachineConfigModel) error {
+	machineStatus, err := getVagrantStatus(configModel)
+	if err != nil {
+		return fmt.Errorf("Failed to get vagrant status: %s", err)
+	}
+
+	log.Debugf("doCreateIfRequired: machineStatus: %#v", machineStatus)
+
+	if machineStatus.Type == "state" && machineStatus.Data == "not_created" {
+		log.Infoln("Machine not yet created - creating with 'vagrant up'...")
+
+		if err := utils.Run(MachineWorkdir.Get(), configModel.Envs.ToCmdEnvs(), "vagrant", "up"); err != nil {
+			return fmt.Errorf("'vagrant up' failed with error: %s", err)
+		}
+
+		log.Infoln("Machine created!")
+	}
+
+	return nil
+}
+
 func setup(c *cli.Context) {
 	log.Infoln("Setup")
 
-	additionalEnvs, err := config.CreateEnvItemsModelFromSlice(MachineParamsAdditionalEnvs)
+	additionalEnvs, err := config.CreateEnvItemsModelFromSlice(MachineParamsAdditionalEnvs.Get())
 	if err != nil {
 		log.Fatalf("Invalid Environment parameter: %s", err)
 	}
 
-	configModel, err := config.ReadMachineConfigFileFromDir(MachineWorkdir, additionalEnvs)
+	configModel, err := config.ReadMachineConfigFileFromDir(MachineWorkdir.Get(), additionalEnvs)
 	if err != nil {
 		log.Fatalln("Failed to read Config file: ", err)
 	}
 
-	isOK, err := pathutil.IsPathExists(path.Join(MachineWorkdir, "Vagrantfile"))
+	isOK, err := pathutil.IsPathExists(path.Join(MachineWorkdir.Get(), "Vagrantfile"))
 	if err != nil {
 		log.Fatalln("Failed to check 'Vagrantfile' in the WorkDir: ", err)
 	}
@@ -114,7 +135,7 @@ func setup(c *cli.Context) {
 	log.Infof("configModel: %#v", configModel)
 
 	isSkipSetups := false
-	if config.IsSSHKeypairFileExistInDirectory(MachineWorkdir) && !c.Bool(ForceFlagKey) {
+	if config.IsSSHKeypairFileExistInDirectory(MachineWorkdir.Get()) && !c.Bool(ForceFlagKey) {
 		log.Info("Host is already prepared and no --force flag was specified, skipping setup.")
 		isSkipSetups = true
 	}
@@ -127,6 +148,12 @@ func setup(c *cli.Context) {
 			}
 		}
 
+		if configModel.CleanupMode == config.CleanupModeDestroy || configModel.IsAllowVagrantCreateInSetup {
+			if err := doCreateIfRequired(configModel); err != nil {
+				log.Fatalf("Failed to Create the VM: %s", err)
+			}
+		}
+
 		// ssh
 		_, err := doSetupSSH(configModel)
 		if err != nil {
@@ -135,7 +162,7 @@ func setup(c *cli.Context) {
 	}
 
 	// time sync
-	sshConfigModel, err := config.ReadSSHConfigFileFromDir(MachineWorkdir)
+	sshConfigModel, err := config.ReadSSHConfigFileFromDir(MachineWorkdir.Get())
 	if err != nil {
 		log.Fatalf("Failed to read SSH Config file! Error: %s", err)
 	}

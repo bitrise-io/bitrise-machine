@@ -11,20 +11,25 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-func doRecreateCleanup(configModel config.MachineConfigModel) error {
+func getVagrantStatus(configModel config.MachineConfigModel) (vagrant.MachineReadableItem, error) {
 	// Read `vagrant status` log/output
-	machineStatus := vagrant.MachineReadableItem{}
-	if outputs, err := utils.RunAndReturnCombinedOutput(MachineWorkdir, configModel.Envs.ToCmdEnvs(), "vagrant", "status", "--machine-readable"); err != nil {
-		if err != nil {
-			log.Errorf("'vagrant status' failed with output: %s", outputs)
-			return err
-		}
-	} else {
-		statusItms := vagrant.ParseMachineReadableItemsFromString(outputs, "", "state")
-		if len(statusItms) != 1 {
-			return fmt.Errorf("Failed to determine the 'status' of the machine. Output was: %s", outputs)
-		}
-		machineStatus = statusItms[0]
+	outputs, err := utils.RunAndReturnCombinedOutput(MachineWorkdir.Get(), configModel.Envs.ToCmdEnvs(), "vagrant", "status", "--machine-readable")
+	if err != nil {
+		return vagrant.MachineReadableItem{}, fmt.Errorf("'vagrant status' failed. Output was: %s", outputs)
+	}
+	statusItms := vagrant.ParseMachineReadableItemsFromString(outputs, "", "state")
+	if len(statusItms) != 1 {
+		return vagrant.MachineReadableItem{}, fmt.Errorf("Failed to determine the 'status' of the machine. Output was: %s", outputs)
+	}
+	return statusItms[0], nil
+}
+
+// destroyCommon ...
+//  common code, cleanup's destroy
+func destroyCommon(configModel config.MachineConfigModel) error {
+	machineStatus, err := getVagrantStatus(configModel)
+	if err != nil {
+		return fmt.Errorf("Failed to get vagrant status: %s", err)
 	}
 
 	if machineStatus.Data != "not_created" {
@@ -37,12 +42,32 @@ func doRecreateCleanup(configModel config.MachineConfigModel) error {
 	} else {
 		log.Infoln("Machine is in not-created state, skipping destroy.")
 	}
+
+	return nil
+}
+
+func doRecreateCleanup(configModel config.MachineConfigModel) error {
+	// destroy
+	if err := destroyCommon(configModel); err != nil {
+		return fmt.Errorf("doRecreateCleanup: failed to destroy: %s", err)
+	}
+
 	// re-create
-	if err := utils.Run(MachineWorkdir, configModel.Envs.ToCmdEnvs(), "vagrant", "up"); err != nil {
+	if err := utils.Run(MachineWorkdir.Get(), configModel.Envs.ToCmdEnvs(), "vagrant", "up"); err != nil {
 		return fmt.Errorf("'vagrant up' failed with error: %s", err)
 	}
 
 	log.Infoln("Machine created and ready!")
+	return nil
+}
+
+func doDestroyCleanup(configModel config.MachineConfigModel) error {
+	// destroy
+	if err := destroyCommon(configModel); err != nil {
+		return fmt.Errorf("doRecreateCleanup: failed to destroy: %s", err)
+	}
+
+	log.Infoln("Machine destroyed, clean!")
 	return nil
 }
 
@@ -55,7 +80,7 @@ func doCustomCleanup(configModel config.MachineConfigModel) error {
 
 	// Read `vagrant status` log/output
 	machineStatus := vagrant.MachineReadableItem{}
-	if outputs, err := utils.RunAndReturnCombinedOutput(MachineWorkdir, configModel.Envs.ToCmdEnvs(), "vagrant", "status", "--machine-readable"); err != nil {
+	if outputs, err := utils.RunAndReturnCombinedOutput(MachineWorkdir.Get(), configModel.Envs.ToCmdEnvs(), "vagrant", "status", "--machine-readable"); err != nil {
 		if err != nil {
 			log.Errorf("'vagrant status' failed with output: %s", outputs)
 			return err
@@ -70,13 +95,13 @@ func doCustomCleanup(configModel config.MachineConfigModel) error {
 
 	if machineStatus.Data == "not_created" {
 		log.Infoln("Machine not yet created - creating with 'vagrant up'...")
-		if err := utils.Run(MachineWorkdir, configModel.Envs.ToCmdEnvs(), "vagrant", "up"); err != nil {
+		if err := utils.Run(MachineWorkdir.Get(), configModel.Envs.ToCmdEnvs(), "vagrant", "up"); err != nil {
 			return fmt.Errorf("'vagrant up' failed with error: %s", err)
 		}
 		log.Infoln("Machine created!")
 	} else {
 		log.Infof("Machine already created - using the specified custom-command (%s) to clean it up...", configModel.CustomCleanupCommand)
-		if err := utils.Run(MachineWorkdir, configModel.Envs.ToCmdEnvs(), "vagrant", configModel.CustomCleanupCommand); err != nil {
+		if err := utils.Run(MachineWorkdir.Get(), configModel.Envs.ToCmdEnvs(), "vagrant", configModel.CustomCleanupCommand); err != nil {
 			return fmt.Errorf("'vagrant %s' failed with error: %s", configModel.CustomCleanupCommand, err)
 		}
 		log.Infoln("Successful custom cleanup")
@@ -94,11 +119,15 @@ func doCleanup(configModel config.MachineConfigModel, isSkipHostCleanup string) 
 
 	if isSkipHostCleanup != "will-be-destroyed" {
 		if configModel.CleanupMode == config.CleanupModeRollback {
-			if err := utils.Run(MachineWorkdir, configModel.Envs.ToCmdEnvs(), "vagrant", "sandbox", "rollback"); err != nil {
+			if err := utils.Run(MachineWorkdir.Get(), configModel.Envs.ToCmdEnvs(), "vagrant", "sandbox", "rollback"); err != nil {
 				return err
 			}
 		} else if configModel.CleanupMode == config.CleanupModeRecreate {
 			if err := doRecreateCleanup(configModel); err != nil {
+				return err
+			}
+		} else if configModel.CleanupMode == config.CleanupModeDestroy {
+			if err := doDestroyCleanup(configModel); err != nil {
 				return err
 			}
 		} else if configModel.CleanupMode == config.CleanupModeCustomCommand {
@@ -112,7 +141,7 @@ func doCleanup(configModel config.MachineConfigModel, isSkipHostCleanup string) 
 		log.Warnln("Skipping Host Cleanup! This option should only be used if the Host is destroyed immediately after this cleanup!!")
 	}
 
-	if err := config.DeleteSSHFilesFromDir(MachineWorkdir); err != nil {
+	if err := config.DeleteSSHFilesFromDir(MachineWorkdir.Get()); err != nil {
 		return fmt.Errorf("Failed to delete SSH file from workdir: %s", err)
 	}
 
@@ -122,13 +151,13 @@ func doCleanup(configModel config.MachineConfigModel, isSkipHostCleanup string) 
 func cleanup(c *cli.Context) {
 	log.Infoln("Cleanup")
 
-	additionalEnvs, err := config.CreateEnvItemsModelFromSlice(MachineParamsAdditionalEnvs)
+	additionalEnvs, err := config.CreateEnvItemsModelFromSlice(MachineParamsAdditionalEnvs.Get())
 	if err != nil {
 		log.Fatalf("Invalid Environment parameter: %s", err)
 	}
 	log.Debugf("additionalEnvs: %#v", additionalEnvs)
 
-	configModel, err := config.ReadMachineConfigFileFromDir(MachineWorkdir, additionalEnvs)
+	configModel, err := config.ReadMachineConfigFileFromDir(MachineWorkdir.Get(), additionalEnvs)
 	if err != nil {
 		log.Fatalln("Failed to read Config file: ", err)
 	}

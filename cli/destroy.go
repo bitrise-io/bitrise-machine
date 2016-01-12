@@ -14,7 +14,7 @@ import (
 func doDestroy(configModel config.MachineConfigModel) error {
 	log.Infoln("==> doDestroy")
 
-	if err := utils.Run(MachineWorkdir, configModel.Envs.ToCmdEnvs(), "vagrant", "destroy", "-f"); err != nil {
+	if err := utils.Run(MachineWorkdir.Get(), configModel.Envs.ToCmdEnvs(), "vagrant", "destroy", "-f"); err != nil {
 		return fmt.Errorf("'vagrant destroy' failed with error: %s", err)
 	}
 
@@ -24,17 +24,17 @@ func doDestroy(configModel config.MachineConfigModel) error {
 func destroy(c *cli.Context) {
 	log.Infoln("Destroy")
 
-	additionalEnvs, err := config.CreateEnvItemsModelFromSlice(MachineParamsAdditionalEnvs)
+	additionalEnvs, err := config.CreateEnvItemsModelFromSlice(MachineParamsAdditionalEnvs.Get())
 	if err != nil {
 		log.Fatalf("Invalid Environment parameter: %s", err)
 	}
 
-	configModel, err := config.ReadMachineConfigFileFromDir(MachineWorkdir, additionalEnvs)
+	configModel, err := config.ReadMachineConfigFileFromDir(MachineWorkdir.Get(), additionalEnvs)
 	if err != nil {
 		log.Fatalln("Failed to read Config file: ", err)
 	}
 
-	isOK, err := pathutil.IsPathExists(path.Join(MachineWorkdir, "Vagrantfile"))
+	isOK, err := pathutil.IsPathExists(path.Join(MachineWorkdir.Get(), "Vagrantfile"))
 	if err != nil {
 		log.Fatalln("Failed to check 'Vagrantfile' in the WorkDir: ", err)
 	}
