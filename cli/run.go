@@ -260,7 +260,7 @@ func performRun(sshConfig config.SSHConfigModel, commandToRunStr string,
 		case <-timeoutTriggerred:
 			runRes = RunResults{RunError: fmt.Errorf("Timeout after %d seconds", timeoutSeconds), IsTimeoutError: true}
 			isRunFinished = true
-		case <-time.Tick(100 * time.Millisecond):
+		case <-time.Tick(500 * time.Millisecond):
 			logTickFn()
 			abortCheckTickFN()
 		}
