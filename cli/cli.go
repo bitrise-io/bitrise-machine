@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"runtime/pprof"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/go-utils/freezable"
@@ -64,6 +65,18 @@ func Run() {
 
 	app.Flags = appFlags
 	app.Commands = commands
+
+	if cpuProfileFilePath := os.Getenv(CPUProfileFilePathEnvKey); cpuProfileFilePath != "" {
+		log.Infof("Enabling CPU Profiler, writing results into file: %s", cpuProfileFilePath)
+		f, err := os.Create(cpuProfileFilePath)
+		if err != nil {
+			log.Fatalf("CPU Profile: failed to create file: %s", err)
+		}
+		if err := pprof.StartCPUProfile(f); err != nil {
+			log.Fatalf("CPU Profile: failed to start CPU profiler: %s", err)
+		}
+		defer pprof.StopCPUProfile()
+	}
 
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal("Finished with error:", err)

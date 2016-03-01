@@ -3,6 +3,13 @@ package cli
 import "github.com/codegangsta/cli"
 
 const (
+	// --- Only available through EnvVar flags
+
+	// CPUProfileFilePathEnvKey ...
+	CPUProfileFilePathEnvKey = "BITRISE_MACHINE_CPU_PROFILE_FILEPATH"
+
+	// --- App flags
+
 	// WorkdirEnvKey ...
 	WorkdirEnvKey = "BITRISE_MACHINE_WORKDIR"
 	// WorkdirKey ...
