@@ -61,12 +61,14 @@ func (buff *LogBuffer) Read(n int) []byte {
 func (buff *LogBuffer) ReadRunes(n int) (string, bool) {
 	buff.rwlock.Lock()
 	defer buff.rwlock.Unlock()
-	res := ""
+	res := make([]rune, n, n)
 	isEOF := false
+	lastIdx := 0
 	for i := 0; i < n; i++ {
 		r, _, err := buff.logBytes.ReadRune()
 		if err == nil {
-			res += string(r)
+			res[i] = r
+			lastIdx = i
 		} else if err == io.EOF {
 			isEOF = true
 			break
@@ -74,7 +76,11 @@ func (buff *LogBuffer) ReadRunes(n int) (string, bool) {
 			log.Errorf("Failed to read from LogBuffer: %s", err)
 		}
 	}
-	return res, isEOF
+
+	if lastIdx == 0 {
+		return "", isEOF
+	}
+	return string(res[:lastIdx+1]), isEOF
 }
 
 // LogChunkModel ...
