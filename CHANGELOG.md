@@ -1,13 +1,18 @@
-## Changelog (Current version: 0.9.7)
+# Changelog
 
 -----------------
 
-## 0.9.7 (2016 Mar 01)
+## 0.9.7 (2016 Mar 05)
 
 ### Release Notes
 
-* __BREAKING__ : change 1
-* change 2
+* Go CPU Profiling can now be enabled by setting the `BITRISE_MACHINE_CPU_PROFILE_FILEPATH`
+  Environment Variable to a file path, e.g. `export BITRISE_MACHINE_CPU_PROFILE_FILEPATH=./cpu.profile`.
+  This profile can be used directly with Go's [`pprof` command line tool](http://blog.golang.org/profiling-go-programs).
+* **Optimized Log handling**: less frequent log chunk processing (instead of doing it every 100ms the tick is now 500ms),
+  and optimized log chunk buffer handling. **These changes should significantly reduce the CPU usage**,
+  in a typical, sustained use case the difference can be 5-10x less CPU usage (~3% CPU usage
+  where the previous version was around 20-25% on the same machine).
 
 ### Install or upgrade
 
@@ -27,6 +32,9 @@ That's all, you're ready to call `bitrise-machine`!
 
 ### Release Commits - 0.9.6 -> 0.9.7
 
+* [bd2fc91] Viktor Benei - Initialized new Changelog, using `releaseman` - full migration is work-in-progress (2016 Mar 01)
+* [68f3f80] Viktor Benei - Changelog: 0.9.7 (2016 Mar 01)
+* [9d4c647] Viktor Benei - on CI make sure Go 1.6 is installed (2016 Mar 01)
 * [ccdfbbd] Viktor Benei - Upgrades for Go 1.6 vendor folder - for testing (2016 Mar 01)
 * [5bc5fca] Viktor Benei - Godeps.json (2016 Mar 01)
 * [16c1e85] Viktor Benei - Docker image: use Go 1.6 (2016 Mar 01)
@@ -36,15 +44,37 @@ That's all, you're ready to call `bitrise-machine`!
 * [3264036] Viktor Benei - optimization in ReadRunes function, as it was the main CPU bottleneck (2016 Mar 01)
 * [dee129f] Viktor Benei - Go CPU profiling can now be turned-on with the `BITRISE_MACHINE_CPU_PROFILE_FILEPATH` Environment Variable (2016 Mar 01)
 * [645472e] Viktor Benei - Release URL change (2016 Feb 29)
-* [f50178c] Viktor Benei - changelog for 0.9.6 (2016 Jan 12)
 
 
 ## 0.9.6 (2016 Jan 12)
 
 ### Release Notes
 
-* __BREAKING__ : change 1
-* change 2
+* New cleanup mode: `CleanupModeDestroy` / `destroy`.
+  Using this option the VM won't be re-created, only destroyed, you'll have to
+  call `setup` before the next `run`. This can be useful if you want to
+  set different parameters (environment variables) for every setup/cleanup,
+  for example the template to use to create the Virtual Machine.
+* You can now allow the creation of the Virtual Machine in `setup`,
+  by setting the `is_allow_vagrant_create_in_setup` option to `true` in `bitrise.machine.config.json`.
+  If this option is set to `false` (default), then, just like it was before,
+  only `cleanup` is allowed to create the Virtual Machine, (in case of
+  a `recreate` and `custom` cleanups), `setup` is not (unless it does a cleanup).
+    * You don't need to set this option for the new `destroy` cleanup mode,
+      it's explicitly allowed for `destroy` cleanup mode to create the
+      Virtual Machine in `setup`.
+    * It's important to note that this creation in `setup` will happen **after** the cleanup,
+      in case the `is_cleanup_before_setup` option is set to `true`. This is
+      required to prevent the Virtual Machine to be destroyed right away,
+      for example if the cleanup mode is `destroy`.
+* To support the dynamic creation use-case a new flag is now available: `-e` / `--environment`.
+  With `-e MY_KEY=my-value` you can specify custom environment variable(s)
+  for your commands. You can add multiple `-e` flags (e.g. `-e KEY1=val1 -e KEY2=val2`).
+  The environment variables you define with `-e` will be appended to the
+  ones defined in your `bitrise.machine.config.json` config file - this
+  also means that you can overwrite the ones defined in `bitrise.machine.config.json`.
+  These environment variables will be available for `setup`, `cleanup` and `destroy`
+  commands, just like the `envs` defined in `bitrise.machine.config.json`.
 
 ### Install or upgrade
 
@@ -64,6 +94,7 @@ That's all, you're ready to call `bitrise-machine`!
 
 ### Release Commits - 0.9.5 -> 0.9.6
 
+* [f50178c] Viktor Benei - changelog for 0.9.6 (2016 Jan 12)
 * [f4f2f9a] Viktor Benei - err check fix (2016 Jan 12)
 * [47f2019] Viktor Benei - implemented CleanupMode destroy ; and global CLI params are now stored in Freezable objects, to prevent modification (2016 Jan 12)
 * [440d333] Viktor Benei - godeps-update (2016 Jan 12)
@@ -73,15 +104,20 @@ That's all, you're ready to call `bitrise-machine`!
 * [6663d0a] Viktor Benei - godeps update (2016 Jan 11)
 * [41ada6b] Viktor Benei - new flag: `--environment` / `-e` (2016 Jan 11)
 * [ec25654] Viktor Benei - upgraded bitrise CLI version (2016 Jan 06)
-* [5ecc6ea] Viktor Benei - added CLI package change note to 0.9.5 changelog (2015 Dec 31)
 
 
 ## 0.9.5 (2015 Dec 31)
 
 ### Release Notes
 
-* __BREAKING__ : change 1
-* change 2
+* Added support for `vagrant` v1.8.x 's new `vagrant ssh-config` output format,
+  which now wraps the IdentityPath in quotation marks.
+* Can now also work with Identity Paths which include space in the path.
+
+__IMPORTANT__ : the CLI package changed how it handles if a command has arguments with flags and specifies `SkipFlagParsing: true` - so we'll switch back to `SkipFlagParsing: false` - the command to run on the remote should be prefixed with `--` in case of `run`.
+
+This means that `bitrise-machine --workdir=... run -timeout=0 ls -alh` won't work anymore,
+you have to add the `--` separator: `bitrise-machine --workdir=... run -timeout=0 -- ls -alh`.
 
 ### Install or upgrade
 
@@ -101,6 +137,7 @@ That's all, you're ready to call `bitrise-machine`!
 
 ### Release Commits - 0.9.4 -> 0.9.5
 
+* [5ecc6ea] Viktor Benei - added CLI package change note to 0.9.5 changelog (2015 Dec 31)
 * [6b3917c] Viktor Benei - FIX : the CLI package changed how it handles if a command has arguments and specifies `SkipFlagParsing: true`- so we'll switch back to `SkipFlagParsing: false` and the command should be prefixed with `--` in case of run, if called with run flags (2015 Dec 31)
 * [14e6ef4] Viktor Benei - final release notes for v0.9.5 (2015 Dec 31)
 * [5e66ac0] Viktor Benei - Dockerfile : golang 1.5.2 (2015 Dec 31)
@@ -112,15 +149,13 @@ That's all, you're ready to call `bitrise-machine`!
 * [6bd987d] Viktor Benei - bitrise.yml : new workflow to create test binaries, for both OS X and Linux, with Go 1.5+ cross compile (2015 Dec 31)
 * [db59c12] Viktor Benei - github URL change : moved from bitrise-io org to bitrise-tools (2015 Dec 31)
 * [2b83a90] Viktor Benei - Godeps dependencies update (2015 Dec 31)
-* [1952623] Viktor Benei - changelog (2015 Oct 27)
 
 
 ## 0.9.4 (2015 Oct 27)
 
 ### Release Notes
 
-* __BREAKING__ : change 1
-* change 2
+* __NEW__ flag : if you define `--abort-check-url` for `bitrise-machine run` it'll periodically check the given URL, and will abort the `run` if it receives a JSON response with `"status": "ok"` and `"is_aborted": true`
 
 ### Install or upgrade
 
@@ -140,17 +175,19 @@ That's all, you're ready to call `bitrise-machine`!
 
 ### Release Commits - 0.9.3 -> 0.9.4
 
+* [1952623] Viktor Benei - changelog (2015 Oct 27)
 * [e78fea4] Viktor Benei - v0.9.4 (2015 Oct 27)
 * [651d4bb] Viktor Benei - abort-check-url handling : call the provided URL (if any) periodically, and abort the build if the URL returns the expected "is_aborted = true" response (2015 Oct 27)
-* [a3bf9aa] Viktor Benei - v0.9.3 (2015 Oct 19)
 
 
 ## 0.9.3 (2015 Oct 19)
 
 ### Release Notes
 
-* __BREAKING__ : change 1
-* change 2
+* First version with official __LINUX__ binary release!
+* New cleanup modes: `recreate` implemented, `custom` also available (you can specify a custom `vagrant` action for cleanup. For example for the DigitalOcean provider a built-in `recreate` action is available, which is more efficient than a full recreate).
+* Environment Variables can also be specified in the `bitrise.machine.config.json` file.
+* __NEW COMMAND__ : `destroy` - to help with completely destroying the "machine".
 
 ### Install or upgrade
 
@@ -170,6 +207,7 @@ That's all, you're ready to call `bitrise-machine`!
 
 ### Release Commits - 0.9.2 -> 0.9.3
 
+* [a3bf9aa] Viktor Benei - v0.9.3 (2015 Oct 19)
 * [d31e8af] Viktor Benei - godeps-update (2015 Oct 19)
 * [eff00a6] Viktor Benei - new command: destroy - to easily destroy the host completely + files to build in Docker, for Linux (2015 Oct 19)
 * [649005e] Viktor Benei - implemented: custom environments handling; cleanup mode 'recreate' and 'custom-action' ; vagrant '--machine-readable' processing (2015 Oct 01)
@@ -179,15 +217,14 @@ That's all, you're ready to call `bitrise-machine`!
 * [0eab7ea] Viktor Benei - deps.go to force-include "`_test`" specific packages (2015 Sep 30)
 * [67635a7] Viktor Benei - godeps-update (2015 Sep 30)
 * [84e9afd] Viktor Benei - v0.9.3 (2015 Sep 30)
-* [c35aa7b] Viktor Benei - 0.9.2 (2015 Sep 03)
 
 
 ## 0.9.2 (2015 Sep 03)
 
 ### Release Notes
 
-* __BREAKING__ : change 1
-* change 2
+* log flush tuning
+* Log Summary MetaInfo printing
 
 ### Install or upgrade
 
@@ -207,18 +244,17 @@ That's all, you're ready to call `bitrise-machine`!
 
 ### Release Commits - 0.9.1 -> 0.9.2
 
+* [c35aa7b] Viktor Benei - 0.9.2 (2015 Sep 03)
 * [cce440c] Viktor Benei - better `golint` CI (2015 Sep 02)
 * [b58ece4] Viktor Benei - Control MetaInfo handling/printing implemented, the first (and so far only) one is `/logs/summary` (2015 Sep 02)
 * [2f9f5cd] Viktor Benei - do log flush more frequently (3 sec instead of 5) (2015 Sep 02)
-* [dc80e95] Viktor Benei - v0.9.1 (2015 Sep 01)
 
 
 ## 0.9.1 (2015 Sep 01)
 
 ### Release Notes
 
-* __BREAKING__ : change 1
-* change 2
+* __NEW__/__BREAKING__ action : `bitrise-machine setup` will skip the cleanup & SSH setup if it detects that the host is already prepared. You can force the full setup by adding the `--force` flag: `bitrise-machine setup --force`
 
 ### Install or upgrade
 
@@ -238,9 +274,9 @@ That's all, you're ready to call `bitrise-machine`!
 
 ### Release Commits - 0.9.0 -> 0.9.1
 
-* [6bc1f2f] Viktor Benei - readme : note about required `bitrise-bridge` (2015 Aug 31)
+* [dc80e95] Viktor Benei - v0.9.1 (2015 Sep 01)
 
 
 -----------------
 
-Updated: 2016 Mar 01
+Generated at: 2016 Mar 05

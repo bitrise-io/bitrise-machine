@@ -34,4 +34,4 @@ changelog:
 
     {{end}}
   header_template: '# Changelog'
-  footer_template: 'Updated at: {{.CurrentDate.Format "2006 Jan 02"}}'
+  footer_template: 'Generated at: {{.CurrentDate.Format "2006 Jan 02"}}'
