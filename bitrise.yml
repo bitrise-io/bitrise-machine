@@ -166,6 +166,11 @@ workflows:
         inputs:
         - content: |-
             #!/bin/bash
+            releaseman -version
+            if [ $? -ne 0 ] ; then
+              echo " (!) releaseman is not installed, skipping changelog generation"
+              exit 0
+            fi
             set -e
             set -x
             releaseman --ci create-changelog --version="${RELEASE_VERSION}"
