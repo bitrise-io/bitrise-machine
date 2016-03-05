@@ -165,18 +165,10 @@ workflows:
         title: Creating release changelog template
         inputs:
         - content: |-
-            changelog_path = "./_changelogs/#{ENV['RELEASE_VERSION']}.md"
-            puts " * changelog_path: #{changelog_path}"
-            template_content = File.read("./_changelogs/template.md")
-            changelog_content = template_content.gsub("{{version}}", ENV['RELEASE_VERSION'])
-            File.open(changelog_path, "w") do |f|
-              f.write(changelog_content)
-            end
-        - runner_bin: ruby
-    # - script:
-    #     title: Open _bin folder
-    #     inputs:
-    #     - content: open _bin
+            #!/bin/bash
+            set -e
+            set -x
+            releaseman --ci create-changelog --version="${RELEASE_VERSION}"
 
   create-release-with-docker-compose:
     steps:
