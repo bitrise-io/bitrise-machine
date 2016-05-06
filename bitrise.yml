@@ -34,29 +34,38 @@ workflows:
         title: Print infos for the test
         inputs:
         - content: |-
-            set -x
+            set -ev
             go version
             echo $GO15VENDOREXPERIMENT
     - script:
         title: GOLIST_WITHOUT_VENDOR
         inputs:
         - content: |-
-            set -e
-            set -x
+            #!/bin/bash
+            set -ex
             no_vendor_paths="$(go list ./... | grep -v vendor)"
             envman add --key GOLIST_WITHOUT_VENDOR --value "$no_vendor_paths"
     - script:
         title: Go Test
         inputs:
-        - content: go test ./...
+        - content: |-
+            #!/bin/bash
+            set -ex
+            go test ./...
     - script:
         title: Go Vet
         inputs:
-        - content: go vet $GOLIST_WITHOUT_VENDOR
+        - content: |-
+            #!/bin/bash
+            set -ex
+            go vet $GOLIST_WITHOUT_VENDOR
     - script:
         title: Err check
         inputs:
-        - content: errcheck -asserts=true -blank=true $GOLIST_WITHOUT_VENDOR
+        - content: |-
+            #!/bin/bash
+            set -ex
+            errcheck -asserts=true -blank=true $GOLIST_WITHOUT_VENDOR
     - script:
         title: Go Lint
         inputs:
@@ -83,8 +92,7 @@ workflows:
         inputs:
         - content: |-
             #!/bin/bash
-            set -v
-            set -e
+            set -ex
 
             go install
 
@@ -95,8 +103,7 @@ workflows:
         inputs:
         - content: |-
             #!/bin/bash
-            set -e
-            set -x
+            set -ex
             go get -u ./...
             rm -rf ./Godeps
             godep save ./...
@@ -133,8 +140,7 @@ workflows:
         inputs:
         - content: |-
             #!/bin/bash
-            set -v
-            set -e
+            set -ex
             if [ -f _bin/tmpbin ] ; then
               rm _bin/tmpbin
             fi
@@ -157,8 +163,7 @@ workflows:
               echo " (!) releaseman is not installed, skipping changelog generation"
               exit 0
             fi
-            set -e
-            set -x
+            set -ex
             releaseman --ci create-changelog --version="${RELEASE_VERSION}"
 
   create-release-with-docker-compose:
@@ -168,8 +173,7 @@ workflows:
         inputs:
         - content: |-
             #!/bin/bash
-            set -e
-            set -v
+            set -ex
 
             docker-compose build --no-cache app
             # docker-compose build app
@@ -181,8 +185,7 @@ workflows:
         inputs:
         - content: |-
             #!/bin/bash
-            set -e
-            set -x
+            set -ex
 
             export ARCH=x86_64
             export GOARCH=amd64
