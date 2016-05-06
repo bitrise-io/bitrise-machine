@@ -28,9 +28,6 @@ workflows:
             # Go lint
             go get -u github.com/golang/lint/golint
 
-            # Go Vet
-            go get -u golang.org/x/tools/cmd/vet
-
   _test:
     steps:
     - script:
