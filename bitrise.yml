@@ -5,7 +5,7 @@ app:
   envs:
   - GO15VENDOREXPERIMENT: "1"
   - BITRISE_BIN_NAME: bitrise-machine
-  - GITHUB_RELEASES_URL: https://github.com/bitrise-tools/${BITRISE_BIN_NAME}/releases
+  - GITHUB_RELEASES_URL: "https://github.com/bitrise-tools/${BITRISE_BIN_NAME}/releases"
 
 workflows:
 
