@@ -2,6 +2,46 @@
 
 -----------------
 
+## 0.9.8 (2016 May 07)
+
+### Release Notes
+
+* __NEW__ : Config Type Envs can now be defined, in addition
+  to "generic" envs in bitrise-machine config.
+  By default these are not loaded / used, but you can define which
+  Config Type Envs you want to "activate" (add to the base Envs)
+  with the new `-config-type-id` flag.
+
+### Install or upgrade
+
+To install this version, run the following commands (in a bash shell):
+
+```
+curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/0.9.8/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+```
+
+Then:
+
+```
+chmod +x /usr/local/bin/bitrise-machine
+```
+
+That's all, you're ready to call `bitrise-machine`!
+
+### Release Commits - 0.9.7 -> 0.9.8
+
+* [a2cf1a0] Viktor Benei - Docker : Go - use 1.6.2 ; bitrise CLI 1.3.3 (2016 May 07)
+* [1fa37e6] Viktor Benei - v0.9.8 (2016 May 07)
+* [1d28643] Viktor Benei - LOG: MachineConfigTypeID - only debug print (2016 May 07)
+* [cabd38b] Viktor Benei - Config Type Envs can now be defined, in addition to "generic" envs in bitrise-machine config. (2016 May 07)
+* [0e080b1] Viktor Benei - bitrise.yml : script step minor (logging) updates (2016 May 06)
+* [75fe394] Viktor Benei - Godeps update (2016 May 06)
+* [5178de4] Viktor Benei - format_version upgrade (2016 May 06)
+* [5991a9d] Viktor Benei - stingified (2016 May 06)
+* [045c75a] Viktor Benei - go vet doesn't have to be installed anymore, it's part of the Go toolkit now (2016 May 06)
+* [cb8ea64] Viktor Benei - no need to install Go 1.6.0 anymore - it's preinstalled everywhere now (2016 May 06)
+
+
 ## 0.9.7 (2016 Mar 05)
 
 ### Release Notes
@@ -279,4 +319,4 @@ That's all, you're ready to call `bitrise-machine`!
 
 -----------------
 
-Generated at: 2016 Mar 05
+Generated at: 2016 May 07
