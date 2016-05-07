@@ -1,4 +1,4 @@
-FROM golang:1.6
+FROM golang:1.6.2
 
 ENV PROJ_NAME bitrise-machine
 
@@ -8,7 +8,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y install git mercurial curl rsync r
 
 #
 # Install Bitrise CLI
-RUN curl -fL https://github.com/bitrise-io/bitrise/releases/download/1.2.4/bitrise-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise
+RUN curl -fL https://github.com/bitrise-io/bitrise/releases/download/1.3.3/bitrise-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise
 RUN chmod +x /usr/local/bin/bitrise
 RUN bitrise setup --minimal
 
