@@ -16,6 +16,8 @@ var (
 	MachineWorkdir = freezable.String{}
 	// MachineParamsAdditionalEnvs ...
 	MachineParamsAdditionalEnvs = freezable.StringSlice{}
+	// MachineConfigTypeID ...
+	MachineConfigTypeID = freezable.String{}
 )
 
 func before(c *cli.Context) error {
@@ -35,6 +37,11 @@ func before(c *cli.Context) error {
 		}
 	}
 	MachineWorkdir.Freeze()
+
+	if err := MachineConfigTypeID.Set(c.String(ConfigTypeIDParamKey)); err != nil {
+		log.Fatalf("Failed to set MachineConfigTypeID: %s", err)
+	}
+	log.Infof("MachineConfigTypeID: %s", MachineConfigTypeID)
 
 	if err := MachineParamsAdditionalEnvs.Set(c.StringSlice(EnvironmentParamKey)); err != nil {
 		log.Fatalf("Failed to set MachineParamsAdditionalEnvs: %s", err)

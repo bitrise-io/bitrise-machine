@@ -6,7 +6,9 @@ import (
 	"path"
 	"strings"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/go-utils/fileutil"
+	"github.com/bitrise-io/go-utils/maputil"
 )
 
 const (
@@ -42,6 +44,9 @@ type MachineConfigModel struct {
 	// Envs - these will be set as Environment Variables
 	//  for setup, cleanup and destroy
 	Envs EnvItemsModel `json:"envs"`
+	// ConfigTypeEnvs - these envs will be added to the
+	//  other Envs based on the "config-type-id" paramter/flag
+	ConfigTypeEnvs map[string]EnvItemsModel `json:"config_type_envs"`
 }
 
 func (configModel *MachineConfigModel) normalizeAndValidate() error {
@@ -55,12 +60,15 @@ func (configModel *MachineConfigModel) normalizeAndValidate() error {
 	if configModel.Envs == nil {
 		configModel.Envs = EnvItemsModel{}
 	}
+	if configModel.ConfigTypeEnvs == nil {
+		configModel.ConfigTypeEnvs = map[string]EnvItemsModel{}
+	}
 
 	return nil
 }
 
-// ToCmdEnvs ...
-func (envItmsModel *EnvItemsModel) ToCmdEnvs() []string {
+// toCmdEnvs ...
+func (envItmsModel *EnvItemsModel) toCmdEnvs() []string {
 	res := make([]string, len(*envItmsModel))
 	idx := 0
 	for key, value := range *envItmsModel {
@@ -68,6 +76,35 @@ func (envItmsModel *EnvItemsModel) ToCmdEnvs() []string {
 		idx++
 	}
 	return res
+}
+
+func (configModel MachineConfigModel) allEnvsForConfigType(configTypeID string) EnvItemsModel {
+	allEnvs := EnvItemsModel{}
+
+	if configModel.Envs != nil {
+		allEnvs = maputil.CloneStringStringMap(configModel.Envs)
+	}
+
+	if configTypeID != "" {
+		if configModel.ConfigTypeEnvs == nil {
+			log.Warningf("No Config Type Envs defined, but Config Type ID was: %s", configTypeID)
+		} else {
+			configSpecEnvs, isFound := configModel.ConfigTypeEnvs[configTypeID]
+			if !isFound {
+				log.Warningf("No Config Type Envs found for the specified Config Type ID: %s", configTypeID)
+			} else {
+				allEnvs = maputil.MergeStringStringMap(allEnvs, configSpecEnvs)
+			}
+		}
+	}
+
+	return allEnvs
+}
+
+// AllCmdEnvsForConfigType ...
+func (configModel MachineConfigModel) AllCmdEnvsForConfigType(configTypeID string) []string {
+	allEnvs := configModel.allEnvsForConfigType(configTypeID)
+	return allEnvs.toCmdEnvs()
 }
 
 // CreateEnvItemsModelFromSlice ...

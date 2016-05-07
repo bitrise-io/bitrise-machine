@@ -17,7 +17,7 @@ func doSetupSSH(configModel config.MachineConfigModel) (config.SSHConfigModel, e
 	sshConfigModel := config.SSHConfigModel{}
 
 	// Read `vagrant ssh-config` log/output
-	outputs, err := utils.RunAndReturnCombinedOutput(MachineWorkdir.Get(), configModel.Envs.ToCmdEnvs(), "vagrant", "ssh-config")
+	outputs, err := utils.RunAndReturnCombinedOutput(MachineWorkdir.Get(), configModel.AllCmdEnvsForConfigType(MachineConfigTypeID.Get()), "vagrant", "ssh-config")
 	if err != nil {
 		log.Errorf("'vagrant ssh-config' failed with output: %s", outputs)
 		return sshConfigModel, err
@@ -101,7 +101,7 @@ func doCreateIfRequired(configModel config.MachineConfigModel) error {
 	if machineStatus.Type == "state" && machineStatus.Data == "not_created" {
 		log.Infoln("Machine not yet created - creating with 'vagrant up'...")
 
-		if err := utils.Run(MachineWorkdir.Get(), configModel.Envs.ToCmdEnvs(), "vagrant", "up"); err != nil {
+		if err := utils.Run(MachineWorkdir.Get(), configModel.AllCmdEnvsForConfigType(MachineConfigTypeID.Get()), "vagrant", "up"); err != nil {
 			return fmt.Errorf("'vagrant up' failed with error: %s", err)
 		}
 

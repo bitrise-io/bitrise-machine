@@ -13,7 +13,9 @@ import (
 
 func getVagrantStatus(configModel config.MachineConfigModel) (vagrant.MachineReadableItem, error) {
 	// Read `vagrant status` log/output
-	outputs, err := utils.RunAndReturnCombinedOutput(MachineWorkdir.Get(), configModel.Envs.ToCmdEnvs(), "vagrant", "status", "--machine-readable")
+	outputs, err := utils.RunAndReturnCombinedOutput(MachineWorkdir.Get(),
+		configModel.AllCmdEnvsForConfigType(MachineConfigTypeID.Get()),
+		"vagrant", "status", "--machine-readable")
 	if err != nil {
 		return vagrant.MachineReadableItem{}, fmt.Errorf("'vagrant status' failed. Output was: %s", outputs)
 	}
@@ -53,7 +55,7 @@ func doRecreateCleanup(configModel config.MachineConfigModel) error {
 	}
 
 	// re-create
-	if err := utils.Run(MachineWorkdir.Get(), configModel.Envs.ToCmdEnvs(), "vagrant", "up"); err != nil {
+	if err := utils.Run(MachineWorkdir.Get(), configModel.AllCmdEnvsForConfigType(MachineConfigTypeID.Get()), "vagrant", "up"); err != nil {
 		return fmt.Errorf("'vagrant up' failed with error: %s", err)
 	}
 
@@ -80,7 +82,7 @@ func doCustomCleanup(configModel config.MachineConfigModel) error {
 
 	// Read `vagrant status` log/output
 	machineStatus := vagrant.MachineReadableItem{}
-	if outputs, err := utils.RunAndReturnCombinedOutput(MachineWorkdir.Get(), configModel.Envs.ToCmdEnvs(), "vagrant", "status", "--machine-readable"); err != nil {
+	if outputs, err := utils.RunAndReturnCombinedOutput(MachineWorkdir.Get(), configModel.AllCmdEnvsForConfigType(MachineConfigTypeID.Get()), "vagrant", "status", "--machine-readable"); err != nil {
 		if err != nil {
 			log.Errorf("'vagrant status' failed with output: %s", outputs)
 			return err
@@ -95,13 +97,13 @@ func doCustomCleanup(configModel config.MachineConfigModel) error {
 
 	if machineStatus.Data == "not_created" {
 		log.Infoln("Machine not yet created - creating with 'vagrant up'...")
-		if err := utils.Run(MachineWorkdir.Get(), configModel.Envs.ToCmdEnvs(), "vagrant", "up"); err != nil {
+		if err := utils.Run(MachineWorkdir.Get(), configModel.AllCmdEnvsForConfigType(MachineConfigTypeID.Get()), "vagrant", "up"); err != nil {
 			return fmt.Errorf("'vagrant up' failed with error: %s", err)
 		}
 		log.Infoln("Machine created!")
 	} else {
 		log.Infof("Machine already created - using the specified custom-command (%s) to clean it up...", configModel.CustomCleanupCommand)
-		if err := utils.Run(MachineWorkdir.Get(), configModel.Envs.ToCmdEnvs(), "vagrant", configModel.CustomCleanupCommand); err != nil {
+		if err := utils.Run(MachineWorkdir.Get(), configModel.AllCmdEnvsForConfigType(MachineConfigTypeID.Get()), "vagrant", configModel.CustomCleanupCommand); err != nil {
 			return fmt.Errorf("'vagrant %s' failed with error: %s", configModel.CustomCleanupCommand, err)
 		}
 		log.Infoln("Successful custom cleanup")
@@ -119,7 +121,7 @@ func doCleanup(configModel config.MachineConfigModel, isSkipHostCleanup string) 
 
 	if isSkipHostCleanup != "will-be-destroyed" {
 		if configModel.CleanupMode == config.CleanupModeRollback {
-			if err := utils.Run(MachineWorkdir.Get(), configModel.Envs.ToCmdEnvs(), "vagrant", "sandbox", "rollback"); err != nil {
+			if err := utils.Run(MachineWorkdir.Get(), configModel.AllCmdEnvsForConfigType(MachineConfigTypeID.Get()), "vagrant", "sandbox", "rollback"); err != nil {
 				return err
 			}
 		} else if configModel.CleanupMode == config.CleanupModeRecreate {

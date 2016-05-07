@@ -14,7 +14,7 @@ import (
 func doDestroy(configModel config.MachineConfigModel) error {
 	log.Infoln("==> doDestroy")
 
-	if err := utils.Run(MachineWorkdir.Get(), configModel.Envs.ToCmdEnvs(), "vagrant", "destroy", "-f"); err != nil {
+	if err := utils.Run(MachineWorkdir.Get(), configModel.AllCmdEnvsForConfigType(MachineConfigTypeID.Get()), "vagrant", "destroy", "-f"); err != nil {
 		return fmt.Errorf("'vagrant destroy' failed with error: %s", err)
 	}
 

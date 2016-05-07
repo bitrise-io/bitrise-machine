@@ -38,27 +38,31 @@
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/builtinutil",
-			"Rev": "c9b453855ddeea6c2ea5875d6a44284979cf2600"
+			"Rev": "de4562ec9453f7a339ae81e55ff75e5a80f1651d"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/cmdex",
-			"Rev": "c9b453855ddeea6c2ea5875d6a44284979cf2600"
+			"Rev": "de4562ec9453f7a339ae81e55ff75e5a80f1651d"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/fileutil",
-			"Rev": "c9b453855ddeea6c2ea5875d6a44284979cf2600"
+			"Rev": "de4562ec9453f7a339ae81e55ff75e5a80f1651d"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/freezable",
-			"Rev": "c9b453855ddeea6c2ea5875d6a44284979cf2600"
+			"Rev": "de4562ec9453f7a339ae81e55ff75e5a80f1651d"
+		},
+		{
+			"ImportPath": "github.com/bitrise-io/go-utils/maputil",
+			"Rev": "de4562ec9453f7a339ae81e55ff75e5a80f1651d"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/pathutil",
-			"Rev": "c9b453855ddeea6c2ea5875d6a44284979cf2600"
+			"Rev": "de4562ec9453f7a339ae81e55ff75e5a80f1651d"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/testutil",
-			"Rev": "c9b453855ddeea6c2ea5875d6a44284979cf2600"
+			"Rev": "de4562ec9453f7a339ae81e55ff75e5a80f1651d"
 		},
 		{
 			"ImportPath": "github.com/codegangsta/cli",

@@ -25,6 +25,9 @@ const (
 	EnvironmentParamKey      = "environment"
 	environmentParamKeyShort = "e"
 
+	// ConfigTypeIDParamKey ...
+	ConfigTypeIDParamKey = "config-type-id"
+
 	// HelpKey ...
 	HelpKey      = "help"
 	helpKeyShort = "h"
@@ -105,6 +108,11 @@ var (
 			Value:  "",
 			Usage:  "Working & config directory path.",
 			EnvVar: WorkdirEnvKey,
+		},
+		cli.StringFlag{
+			Name:  ConfigTypeIDParamKey,
+			Value: "",
+			Usage: "Config Type ID. This can be used for loading additional, config-type specific Environment Variables from the bitrise-machine config JSON.",
 		},
 		cli.StringSliceFlag{
 			Name:  EnvironmentParamKey + ", " + environmentParamKeyShort,
