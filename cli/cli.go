@@ -41,7 +41,7 @@ func before(c *cli.Context) error {
 	if err := MachineConfigTypeID.Set(c.String(ConfigTypeIDParamKey)); err != nil {
 		log.Fatalf("Failed to set MachineConfigTypeID: %s", err)
 	}
-	log.Infof("MachineConfigTypeID: %s", MachineConfigTypeID)
+	log.Debugf("MachineConfigTypeID: %s", MachineConfigTypeID)
 
 	if err := MachineParamsAdditionalEnvs.Set(c.StringSlice(EnvironmentParamKey)); err != nil {
 		log.Fatalf("Failed to set MachineParamsAdditionalEnvs: %s", err)
