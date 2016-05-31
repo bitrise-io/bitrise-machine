@@ -56,7 +56,7 @@ func printVersion(c *cli.Context) {
 	fmt.Fprintf(c.App.Writer, "%v\n", c.App.Version)
 }
 
-// Run the Envman CLI.
+// Run the CLI
 func Run() {
 	cli.VersionPrinter = printVersion
 
