@@ -87,7 +87,6 @@ workflows:
         - content: |-
             #!/bin/bash
             set -ex
-
             go install
 
   godeps-update:
