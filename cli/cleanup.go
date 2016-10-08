@@ -121,7 +121,7 @@ func doCleanup(configModel config.MachineConfigModel, isSkipHostCleanup string) 
 
 	if isSkipHostCleanup != "will-be-destroyed" {
 		if configModel.CleanupMode == config.CleanupModeRollback {
-			if err := utils.Run(MachineWorkdir.Get(), configModel.AllCmdEnvsForConfigType(MachineConfigTypeID.Get()), "vagrant", "sandbox", "rollback"); err != nil {
+			if err := utils.Run(MachineWorkdir.Get(), configModel.AllCmdEnvsForConfigType(MachineConfigTypeID.Get()), "vagrant", "snapshot", "pop", "--no-delete"); err != nil {
 				return err
 			}
 		} else if configModel.CleanupMode == config.CleanupModeRecreate {
