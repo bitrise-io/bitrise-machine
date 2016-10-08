@@ -3,13 +3,12 @@
 ## Requirements
 
 * [vagrant](https://www.vagrantup.com)
-* [vagrant sahara](https://github.com/jedi4ever/sahara) (sandbox) plugin, for VM snapshot handling, if you use `"cleanup_mode": "rollback",`
 * [bitrise-bridge](https://github.com/bitrise-io/bitrise-bridge) for communication with the host
 
 
 ## Cleanup modes
 
-* `rollback` : runs `vagrant sandbox rollback` to clean up - **requires** the [vagrant sahara](https://github.com/jedi4ever/sahara) `vagrant` plugin
+* `rollback` : runs `vagrant snapshot pop` to clean up - **requires** at least `vagrant` v1.8.0
 * `recreate` : runs `vagrant destroy -f` and then `vagrant up` to clean up
 * `destroy` : runs `vagrant destroy -f` to cleanup, and allows `bitrise-machine setup` to create the Virtual Machine with `vagrant up`
 * `custom-command` : runs `vagrant CUSTOM-COMMAND` to clean up, or `vagrant up` in case the Virtual Machine is not yet created
