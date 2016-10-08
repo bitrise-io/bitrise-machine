@@ -2,6 +2,41 @@
 
 -----------------
 
+## 0.9.9 (2016 Oct 08)
+
+### Release Notes
+
+* __BREAKING__ : the `rollback` cleanup mode now uses `vagrant`'s built in
+  `vagrant snapshot` command (`vagrant snapshot pop --no-delete`), instead
+  of the `vagrant-sahara` plugin. This also means that it requires `vagrant` v1.8.0
+  or newer
+
+### Install or upgrade
+
+To install this version, run the following commands (in a bash shell):
+
+```
+curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/0.9.9/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+```
+
+Then:
+
+```
+chmod +x /usr/local/bin/bitrise-machine
+```
+
+That's all, you're ready to call `bitrise-machine`!
+
+### Release Commits - 0.9.8 -> 0.9.9
+
+* [f68a96b] Viktor Benei - v0.9.9 (2016 Oct 08)
+* [c1463cf] Viktor Benei - godeps update + bitrise.yml deps update (#4) (2016 Oct 08)
+* [05536f0] Viktor Benei - Merge pull request #3 from bitrise-tools/feature/vagrant-snapshot-instead-of-sandbox (2016 Oct 08)
+* [3a2292a] Viktor Benei - replaced vagrant sandbox with snapshot (2016 Oct 08)
+* [2f99c59] Viktor Benei - minor bitrise.yml revision (2016 Aug 01)
+* [1ae18cb] Viktor Benei - comment fix (2016 May 31)
+
+
 ## 0.9.8 (2016 May 07)
 
 ### Release Notes
@@ -319,4 +354,4 @@ That's all, you're ready to call `bitrise-machine`!
 
 -----------------
 
-Generated at: 2016 May 07
+Generated at: 2016 Oct 08
