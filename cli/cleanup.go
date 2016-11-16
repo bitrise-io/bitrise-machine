@@ -8,7 +8,7 @@ import (
 	"github.com/bitrise-tools/bitrise-machine/config"
 	"github.com/bitrise-tools/bitrise-machine/utils"
 	"github.com/bitrise-tools/bitrise-machine/vagrant"
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 )
 
 func getVagrantStatus(configModel config.MachineConfigModel) (vagrant.MachineReadableItem, error) {
@@ -76,7 +76,7 @@ func doDestroyCleanup(configModel config.MachineConfigModel) error {
 func doCustomCleanup(configModel config.MachineConfigModel) error {
 	log.Infoln("Cleanup mode: custom-command")
 	if configModel.CustomCleanupCommand == "" {
-		return errors.New("Cleanup mode was custom-command, but no custom cleanup command specified!")
+		return errors.New("cleanup mode was custom-command, but no custom cleanup command specified")
 	}
 	log.Infof("=> Specified custom command: %s", configModel.CustomCleanupCommand)
 

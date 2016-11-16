@@ -91,7 +91,10 @@ func (c Command) Run(ctx *Context) (err error) {
 		c.Flags = append(c.Flags, BashCompletionFlag)
 	}
 
-	set := flagSet(c.Name, c.Flags)
+	set, err := flagSet(c.Name, c.Flags)
+	if err != nil {
+		return err
+	}
 	set.SetOutput(ioutil.Discard)
 
 	if c.SkipFlagParsing {
@@ -138,7 +141,7 @@ func (c Command) Run(ctx *Context) (err error) {
 			HandleExitCoder(err)
 			return err
 		}
-		fmt.Fprintln(ctx.App.Writer, "Incorrect Usage.")
+		fmt.Fprintln(ctx.App.Writer, "Incorrect Usage:", err.Error())
 		fmt.Fprintln(ctx.App.Writer)
 		ShowCommandHelp(ctx, c.Name)
 		return err
@@ -185,6 +188,10 @@ func (c Command) Run(ctx *Context) (err error) {
 			HandleExitCoder(err)
 			return err
 		}
+	}
+
+	if c.Action == nil {
+		c.Action = helpSubcommand.Action
 	}
 
 	context.Command = c

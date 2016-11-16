@@ -8,7 +8,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/go-utils/freezable"
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 )
 
 var (
@@ -28,7 +28,7 @@ func before(c *cli.Context) error {
 		log.SetLevel(logLevel)
 	}
 
-	if len(c.Args()) != 0 && !c.Bool(HelpKey) && !c.Bool(VersionKey) {
+	if len(c.Args()) != 0 && c.Args().First() != "version" && !c.Bool(HelpKey) && !c.Bool(VersionKey) {
 		if err := MachineWorkdir.Set(c.String(WorkdirKey)); err != nil {
 			log.Fatalf("Failed to set MachineWorkdir: %s", err)
 		}
@@ -63,7 +63,7 @@ func Run() {
 	app := cli.NewApp()
 	app.Name = path.Base(os.Args[0])
 	app.Usage = "bitrise-machine"
-	app.Version = "0.9.9"
+	app.Version = "0.9.10"
 
 	app.Author = ""
 	app.Email = ""

@@ -14,7 +14,7 @@ import (
 	"github.com/bitrise-io/go-utils/cmdex"
 	"github.com/bitrise-tools/bitrise-machine/config"
 	"github.com/bitrise-tools/bitrise-machine/utils"
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 )
 
 const (
