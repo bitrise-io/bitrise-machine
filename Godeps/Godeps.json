@@ -44,11 +44,6 @@
 			"Rev": "f9155f8d01013ec098cba431327cbeb063dacea7"
 		},
 		{
-			"ImportPath": "github.com/codegangsta/cli",
-			"Comment": "v1.18.0-101-gb4f4786",
-			"Rev": "b4f4786f378c0c1d3336b5bb798094b166edf5a9"
-		},
-		{
 			"ImportPath": "github.com/davecgh/go-spew/spew",
 			"Comment": "v1.1.0",
 			"Rev": "346938d642f2ec3594ed81d874461961cd0faa76"
@@ -67,6 +62,11 @@
 			"ImportPath": "github.com/stretchr/testify/require",
 			"Comment": "v1.1.4-4-g976c720",
 			"Rev": "976c720a22c8eb4eb6a0b4348ad85ad12491a506"
+		},
+		{
+			"ImportPath": "github.com/urfave/cli",
+			"Comment": "v1.18.0-101-gb4f4786",
+			"Rev": "b4f4786f378c0c1d3336b5bb798094b166edf5a9"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/curve25519",
