@@ -47,7 +47,7 @@ const (
 	// ForceFlagKey ...
 	ForceFlagKey = "force"
 
-	//
+	// FullFlagKey ...
 	FullFlagKey = "full"
 )
 
