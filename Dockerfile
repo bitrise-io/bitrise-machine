@@ -1,4 +1,4 @@
-FROM golang:1.7.1
+FROM golang:1.7.3
 
 ENV PROJ_NAME bitrise-machine
 
@@ -8,13 +8,11 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y install git mercurial curl rsync r
 
 #
 # Install Bitrise CLI
-RUN curl -fL https://github.com/bitrise-io/bitrise/releases/download/1.4.0/bitrise-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise
+RUN curl -fL https://github.com/bitrise-io/bitrise/releases/download/1.4.5/bitrise-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise
 RUN chmod +x /usr/local/bin/bitrise
 RUN bitrise setup
 
 # Install required (testing) tools
-#  Install dependencies
-RUN go get -u github.com/tools/godep
 #  Check for unhandled errors
 RUN go get -u github.com/kisielk/errcheck
 #  Go lint
@@ -30,8 +28,6 @@ RUN mkdir -p /go/src/github.com/bitrise-tools/$PROJ_NAME
 COPY . /go/src/github.com/bitrise-tools/$PROJ_NAME
 
 WORKDIR /go/src/github.com/bitrise-tools/$PROJ_NAME
-# godep
-RUN go get -u github.com/tools/godep
 # install
 RUN go install
 
