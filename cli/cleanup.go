@@ -8,7 +8,7 @@ import (
 	"github.com/bitrise-tools/bitrise-machine/config"
 	"github.com/bitrise-tools/bitrise-machine/utils"
 	"github.com/bitrise-tools/bitrise-machine/vagrant"
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 )
 
 func getVagrantStatus(configModel config.MachineConfigModel) (vagrant.MachineReadableItem, error) {

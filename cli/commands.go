@@ -1,6 +1,6 @@
 package cli
 
-import "github.com/codegangsta/cli"
+import "github.com/urfave/cli"
 
 const (
 	// --- Only available through EnvVar flags
@@ -46,6 +46,9 @@ const (
 	LogFormatFlagKey = "logformat"
 	// ForceFlagKey ...
 	ForceFlagKey = "force"
+
+	//
+	FullFlagKey = "full"
 )
 
 var (
@@ -93,6 +96,17 @@ var (
 			Name:   "cleanup",
 			Usage:  "Cleanup the Host.",
 			Action: cleanup,
+		},
+		{
+			Name:   "version",
+			Usage:  "Print version info",
+			Action: version,
+			Flags: []cli.Flag{
+				cli.BoolFlag{
+					Name:  FullFlagKey,
+					Usage: "Full/verbose version",
+				},
+			},
 		},
 	}
 

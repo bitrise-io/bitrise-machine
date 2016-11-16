@@ -9,7 +9,7 @@ import (
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-tools/bitrise-machine/config"
 	"github.com/bitrise-tools/bitrise-machine/utils"
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 )
 
 func doSetupSSH(configModel config.MachineConfigModel) (config.SSHConfigModel, error) {
