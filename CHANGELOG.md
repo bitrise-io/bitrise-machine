@@ -2,6 +2,36 @@
 
 -----------------
 
+## 0.9.10 (2016 Nov 16)
+
+### Release Notes
+
+* dependency updates & recompile with Go 1.7.3
+* a new `version` command, with `--full` flag: `bitrise-machine version --full`
+    * prints a verbose version info, including the Go version, OS and ARCH
+      where the binary was created
+
+### Install or upgrade
+
+To install this version, run the following commands (in a bash shell):
+
+```
+curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/0.9.10/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+```
+
+Then:
+
+```
+chmod +x /usr/local/bin/bitrise-machine
+```
+
+That's all, you're ready to call `bitrise-machine`!
+
+### Release Commits - 0.9.9 -> 0.9.10
+
+* [043bec4] Viktor Benei - Feature/dep updates (#5) (2016 Nov 16)
+
+
 ## 0.9.9 (2016 Oct 08)
 
 ### Release Notes
@@ -354,4 +384,4 @@ That's all, you're ready to call `bitrise-machine`!
 
 -----------------
 
-Generated at: 2016 Oct 08
+Generated at: 2016 Nov 16
