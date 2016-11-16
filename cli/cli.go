@@ -63,7 +63,7 @@ func Run() {
 	app := cli.NewApp()
 	app.Name = path.Base(os.Args[0])
 	app.Usage = "bitrise-machine"
-	app.Version = "0.9.9"
+	app.Version = "0.9.10"
 
 	app.Author = ""
 	app.Email = ""
