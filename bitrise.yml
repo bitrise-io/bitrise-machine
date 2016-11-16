@@ -1,9 +1,8 @@
-format_version: 1.2.0
+format_version: 1.3.1
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
   envs:
-  - GO15VENDOREXPERIMENT: "1"
   - BITRISE_BIN_NAME: bitrise-machine
   - GITHUB_RELEASES_URL: "https://github.com/bitrise-tools/${BITRISE_BIN_NAME}/releases"
 
@@ -28,9 +27,8 @@ workflows:
         title: Print infos for the test
         inputs:
         - content: |-
-            set -ev
+            set -ex
             go version
-            echo $GO15VENDOREXPERIMENT
     - script:
         title: GOLIST_WITHOUT_VENDOR
         inputs:
