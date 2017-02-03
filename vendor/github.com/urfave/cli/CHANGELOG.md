@@ -4,8 +4,20 @@
 
 ## [Unreleased]
 
+## [1.19.1] - 2016-11-21
 
-## [1.19.0] - 2016-11-12
+### Fixed
+
+- Fixes regression introduced in 1.19.0 where using an `ActionFunc` as
+  the `Action` for a command would cause it to error rather than calling the
+  function. Should not have a affected declarative cases using `func(c
+  *cli.Context) err)`.
+- Shell completion now handles the case where the user specifies
+  `--generate-bash-completion` immediately after a flag that takes an argument.
+  Previously it call the application with `--generate-bash-completion` as the
+  flag value.
+
+## [1.19.0] - 2016-11-19
 ### Added
 - `FlagsByName` was added to make it easy to sort flags (e.g. `sort.Sort(cli.FlagsByName(app.Flags))`)
 - A `Description` field was added to `App` for a more detailed description of
@@ -19,6 +31,8 @@
   library). This is backported functionality from the [removal of the flag
   reordering](https://github.com/urfave/cli/pull/398) in the unreleased version
   2
+- For formatted errors (those implementing `ErrorFormatter`), the errors will
+  be formatted during output. Compatible with `pkg/errors`.
 
 ### Changed
 - Raise minimum tested/supported Go version to 1.2+

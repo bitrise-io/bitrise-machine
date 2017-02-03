@@ -11,7 +11,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/bitrise-io/go-utils/cmdex"
+	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-tools/bitrise-machine/config"
 	"github.com/bitrise-tools/bitrise-machine/utils"
 	"github.com/urfave/cli"
@@ -293,7 +293,7 @@ func run(c *cli.Context) {
 	}
 
 	// fullCmdToRunStr := fmt.Sprintf("%s %s", cmdToRun, strings.Join(cmdToRunArgs, " "))
-	fullCmdToRunStr := cmdex.LogPrintableCommandArgs(append([]string{cmdToRun}, cmdToRunArgs...))
+	fullCmdToRunStr := command.PrintableCommandArgs(false, append([]string{cmdToRun}, cmdToRunArgs...))
 	log.Infoln("fullCmdToRunStr: ", fullCmdToRunStr)
 
 	timeoutSecs := c.Int(TimeoutFlagKey)

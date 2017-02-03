@@ -1,47 +1,47 @@
 {
 	"ImportPath": "github.com/bitrise-tools/bitrise-machine",
 	"GoVersion": "go1.7",
-	"GodepVersion": "v75",
+	"GodepVersion": "v79",
 	"Packages": [
 		"./..."
 	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/Sirupsen/logrus",
-			"Comment": "v0.11.0-5-gabc6f20",
-			"Rev": "abc6f20dabf4b10195f233ad21ea6c5ba33acae0"
+			"Comment": "v0.11.0-35-g61e43dc",
+			"Rev": "61e43dc76f7ee59a82bdf3d71033dc12bea4c77d"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/builtinutil",
-			"Rev": "f9155f8d01013ec098cba431327cbeb063dacea7"
+			"Rev": "e9b911a4cdf5eda62401973d0c299e7e42637315"
 		},
 		{
-			"ImportPath": "github.com/bitrise-io/go-utils/cmdex",
-			"Rev": "f9155f8d01013ec098cba431327cbeb063dacea7"
+			"ImportPath": "github.com/bitrise-io/go-utils/command",
+			"Rev": "e9b911a4cdf5eda62401973d0c299e7e42637315"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/errorutil",
-			"Rev": "f9155f8d01013ec098cba431327cbeb063dacea7"
+			"Rev": "e9b911a4cdf5eda62401973d0c299e7e42637315"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/fileutil",
-			"Rev": "f9155f8d01013ec098cba431327cbeb063dacea7"
+			"Rev": "e9b911a4cdf5eda62401973d0c299e7e42637315"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/freezable",
-			"Rev": "f9155f8d01013ec098cba431327cbeb063dacea7"
+			"Rev": "e9b911a4cdf5eda62401973d0c299e7e42637315"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/maputil",
-			"Rev": "f9155f8d01013ec098cba431327cbeb063dacea7"
+			"Rev": "e9b911a4cdf5eda62401973d0c299e7e42637315"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/pathutil",
-			"Rev": "f9155f8d01013ec098cba431327cbeb063dacea7"
+			"Rev": "e9b911a4cdf5eda62401973d0c299e7e42637315"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/testutil",
-			"Rev": "f9155f8d01013ec098cba431327cbeb063dacea7"
+			"Rev": "e9b911a4cdf5eda62401973d0c299e7e42637315"
 		},
 		{
 			"ImportPath": "github.com/davecgh/go-spew/spew",
@@ -55,38 +55,38 @@
 		},
 		{
 			"ImportPath": "github.com/stretchr/testify/assert",
-			"Comment": "v1.1.4-4-g976c720",
-			"Rev": "976c720a22c8eb4eb6a0b4348ad85ad12491a506"
+			"Comment": "v1.1.4-27-g4d4bfba",
+			"Rev": "4d4bfba8f1d1027c4fdbe371823030df51419987"
 		},
 		{
 			"ImportPath": "github.com/stretchr/testify/require",
-			"Comment": "v1.1.4-4-g976c720",
-			"Rev": "976c720a22c8eb4eb6a0b4348ad85ad12491a506"
+			"Comment": "v1.1.4-27-g4d4bfba",
+			"Rev": "4d4bfba8f1d1027c4fdbe371823030df51419987"
 		},
 		{
 			"ImportPath": "github.com/urfave/cli",
-			"Comment": "v1.18.0-101-gb4f4786",
-			"Rev": "b4f4786f378c0c1d3336b5bb798094b166edf5a9"
+			"Comment": "v1.19.1-21-g347a988",
+			"Rev": "347a9884a87374d000eec7e6445a34487c1f4a2b"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/curve25519",
-			"Rev": "9477e0b78b9ac3d0b03822fd95422e2fe07627cd"
+			"Rev": "bed12803fa9663d7aa2c2346b0c634ad2dcd43b7"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/ed25519",
-			"Rev": "9477e0b78b9ac3d0b03822fd95422e2fe07627cd"
+			"Rev": "bed12803fa9663d7aa2c2346b0c634ad2dcd43b7"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/ed25519/internal/edwards25519",
-			"Rev": "9477e0b78b9ac3d0b03822fd95422e2fe07627cd"
+			"Rev": "bed12803fa9663d7aa2c2346b0c634ad2dcd43b7"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/ssh",
-			"Rev": "9477e0b78b9ac3d0b03822fd95422e2fe07627cd"
+			"Rev": "bed12803fa9663d7aa2c2346b0c634ad2dcd43b7"
 		},
 		{
 			"ImportPath": "golang.org/x/sys/unix",
-			"Rev": "b699b7032584f0953262cb2788a0ca19bb494703"
+			"Rev": "7a6e5648d140666db5d920909e082ca00a87ba2c"
 		}
 	]
 }
