@@ -1,13 +1,10 @@
 format_version: 1.3.1
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
-
 app:
   envs:
   - BITRISE_BIN_NAME: bitrise-machine
-  - GITHUB_RELEASES_URL: "https://github.com/bitrise-tools/${BITRISE_BIN_NAME}/releases"
-
+  - GITHUB_RELEASES_URL: https://github.com/bitrise-tools/${BITRISE_BIN_NAME}/releases
 workflows:
-
   _install_test_tools:
     steps:
     - script:
@@ -20,7 +17,6 @@ workflows:
             go get -u github.com/kisielk/errcheck
             # Go lint
             go get -u github.com/golang/lint/golint
-
   _test:
     steps:
     - script:
@@ -74,36 +70,6 @@ workflows:
                 exit 1
               fi
             done <<< "$GOLIST_WITHOUT_VENDOR"
-
-  install:
-    before_run:
-    - _test
-    steps:
-    - script:
-        title: Test & install
-        inputs:
-        - content: |-
-            #!/bin/bash
-            set -ex
-            go install
-
-  godeps-update:
-    steps:
-    - script:
-        title: Dependency update
-        inputs:
-        - content: |-
-            #!/bin/bash
-            set -ex
-            go get -u github.com/tools/godep
-            rm -rf ./Godeps
-            rm -rf ./vendor
-            go get -t -d ./...
-            go get golang.org/x/sys/unix
-            go get github.com/davecgh/go-spew/spew
-            go get github.com/pmezard/go-difflib/difflib
-            godep save ./...
-
   ci:
     before_run:
     - _install_test_tools
@@ -116,8 +82,8 @@ workflows:
         - channel: $INTERNAL_DEV_SLACK_CHANNEL
         - from_username: ${BITRISE_BIN_NAME} - CI - OK
         - from_username_on_error: ${BITRISE_BIN_NAME} - CI - ERROR
-        - emoji: ":white_check_mark:"
-        - emoji_on_error: ":no_entry_sign:"
+        - emoji: ':white_check_mark:'
+        - emoji_on_error: ':no_entry_sign:'
         - message: |-
             CI was successful on branch: *${BITRISE_GIT_BRANCH}*
 
@@ -126,7 +92,6 @@ workflows:
             CI FAILED on branch: *${BITRISE_GIT_BRANCH}*
 
             Build URL: ${BITRISE_BUILD_URL}
-
   create-release:
     before_run:
     - _test
@@ -161,7 +126,6 @@ workflows:
             fi
             set -ex
             releaseman --ci create-changelog --version="${RELEASE_VERSION}"
-
   create-release-with-docker-compose:
     steps:
     - script:
@@ -174,7 +138,6 @@ workflows:
             docker-compose build --no-cache app
             # docker-compose build app
             docker-compose run --rm app bitrise run create-release
-
   create-test-binaries:
     steps:
     - script:
@@ -195,3 +158,30 @@ workflows:
             export GOOS=linux
             deploy_pth="./_bin/test-bins/$BITRISE_BIN_NAME-$OS-$ARCH"
             go build -o "$deploy_pth"
+  godeps-update:
+    steps:
+    - script:
+        title: Dependency update
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            go get -u github.com/tools/godep
+            rm -rf ./Godeps
+            rm -rf ./vendor
+            go get -t -d ./...
+            go get golang.org/x/sys/unix
+            go get github.com/davecgh/go-spew/spew
+            go get github.com/pmezard/go-difflib/difflib
+            godep save ./...
+  install:
+    before_run:
+    - _test
+    steps:
+    - script:
+        title: Test & install
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            go install
