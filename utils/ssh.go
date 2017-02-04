@@ -15,7 +15,22 @@ import (
 	"github.com/bitrise-tools/bitrise-machine/config"
 )
 
+// StartAsyncCommandThroughSSHWithWriters ...
+func StartAsyncCommandThroughSSHWithWriters(sshConfigModel config.SSHConfigModel, cmdToRunWithSSH string, stdout, stderr io.Writer) (*exec.Cmd, error) {
+	sshArgs := sshConfigModel.SSHCommandArgs()
+	fullArgs := append(sshArgs, cmdToRunWithSSH)
+
+	cmd := exec.Command("ssh", fullArgs...)
+	log.Debugf("StartAsyncCommandThroughSSHWithWriters: Full command to run: %v", cmd.Args)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
+
+	return cmd, cmd.Start()
+}
+
 // RunCommandThroughSSHWithWriters ...
+// TODO: this could possibly use StartAsyncCommandThroughSSHWithWriters and `return cmd.Wait()`
 func RunCommandThroughSSHWithWriters(sshConfigModel config.SSHConfigModel, cmdToRunWithSSH string, stdout, stderr io.Writer) error {
 	sshArgs := sshConfigModel.SSHCommandArgs()
 	fullArgs := append(sshArgs, cmdToRunWithSSH)

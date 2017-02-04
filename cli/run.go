@@ -10,6 +10,8 @@ import (
 	"sync"
 	"time"
 
+	"os/exec"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-tools/bitrise-machine/config"
@@ -18,7 +20,8 @@ import (
 )
 
 const (
-	logChunkRuneLenght         = 10000 // ~ 10 KB
+	logChunkRuneLenght         = 10 * 1000        // ~ 10 KB
+	maxLogBufferRuneLength     = 10 * 1000 * 1000 // ~ 10 MB
 	abortCheckFrequencySeconds = 10.0
 
 	buildFinishedWithErrorExitCode    = 10
@@ -42,12 +45,36 @@ type RunResults struct {
 type LogBuffer struct {
 	logBytes bytes.Buffer
 	rwlock   sync.RWMutex
+	//
+	lastLogBufferOverflowReportedAt time.Time
+	isLogBufferOverflowReported     bool
 }
 
 // Write ...
 func (buff *LogBuffer) Write(p []byte) (n int, err error) {
 	buff.rwlock.Lock()
 	defer buff.rwlock.Unlock()
+
+	if buff.logBytes.Len() > maxLogBufferRuneLength {
+		// log buffer overflow
+		if !buff.isLogBufferOverflowReported {
+			// report it once in the bitrise-machine log
+			buff.isLogBufferOverflowReported = true
+			log.Error(" [!] Exception: Log Buffer Overflow: ignoring new writes temporarily")
+		}
+
+		timeDiffSec := time.Now().Sub(buff.lastLogBufferOverflowReportedAt).Seconds()
+		if timeDiffSec > 10.0 {
+			// report it every 10 seconds (when overflow happens) in the build log
+			buff.lastLogBufferOverflowReportedAt = time.Now()
+			_, err := buff.logBytes.Write([]byte("\n\n [!!!] (Temporary) Log Buffer Overflow - Ignoring log chunk(s). Please check what generates so much log in such a short time.\n\n"))
+			if err != nil {
+				log.Errorf(" [!] Exception: failed to write into log buffer, error: %s", err)
+			}
+		}
+		return len(p), nil
+	}
+
 	return buff.logBytes.Write(p)
 }
 
@@ -194,12 +221,29 @@ func performRun(sshConfig config.SSHConfigModel, commandToRunStr string,
 		RunError:       nil,
 	}
 	c1 := make(chan RunResults, 1)
+	var runningCommand *exec.Cmd
 	go func() {
-		if err := utils.RunCommandThroughSSHWithWriters(sshConfig, commandToRunStr, &logBuff, &logBuff); err != nil {
-			log.Errorf("Failed to run command, error: %s", err)
-			c1 <- RunResults{RunError: err, IsTimeoutError: false}
-		} else {
-			c1 <- RunResults{RunError: nil, IsTimeoutError: false}
+		{
+			sshCmd, cmdStartErr := utils.StartAsyncCommandThroughSSHWithWriters(sshConfig, commandToRunStr, &logBuff, &logBuff)
+			if cmdStartErr != nil {
+				log.Errorf("Failed to start command, error: %s", cmdStartErr)
+				c1 <- RunResults{RunError: cmdStartErr, IsTimeoutError: false}
+				return
+			}
+			runningCommand = sshCmd
+		}
+
+		{
+			if err := runningCommand.Wait(); err != nil {
+				if isRunFinished {
+					// already finished - command was aborted
+					return
+				}
+				log.Errorf("Failed to run command, error: %s", err)
+				c1 <- RunResults{RunError: err, IsTimeoutError: false}
+			} else {
+				c1 <- RunResults{RunError: nil, IsTimeoutError: false}
+			}
 		}
 	}()
 
@@ -251,11 +295,8 @@ func performRun(sshConfig config.SSHConfigModel, commandToRunStr string,
 	for !isRunFinished {
 		select {
 		case res := <-c1:
-			if res.RunError == nil {
-				runRes = res
-			} else {
-				runRes = res
-			}
+			runRes = res
+			runningCommand = nil
 			isRunFinished = true
 		case <-timeoutTriggerred:
 			runRes = RunResults{RunError: fmt.Errorf("Timeout after %d seconds", timeoutSeconds), IsTimeoutError: true}
@@ -263,6 +304,16 @@ func performRun(sshConfig config.SSHConfigModel, commandToRunStr string,
 		case <-time.Tick(500 * time.Millisecond):
 			logTickFn()
 			abortCheckTickFN()
+		}
+	}
+
+	// abort command if it's still running
+	// important to stop it, before we'd proceed with
+	// processing the remaining chunks of the log,
+	// so that no new log is added to the buffer
+	if runningCommand != nil {
+		if err := runningCommand.Process.Kill(); err != nil {
+			log.Errorf("Failed to abort command, error: %s", err)
 		}
 	}
 
@@ -292,7 +343,6 @@ func run(c *cli.Context) {
 		log.Fatalf("Failed to read SSH configs - you should probably call 'setup' first! Error: %s", err)
 	}
 
-	// fullCmdToRunStr := fmt.Sprintf("%s %s", cmdToRun, strings.Join(cmdToRunArgs, " "))
 	fullCmdToRunStr := command.PrintableCommandArgs(false, append([]string{cmdToRun}, cmdToRunArgs...))
 	log.Infoln("fullCmdToRunStr: ", fullCmdToRunStr)
 
