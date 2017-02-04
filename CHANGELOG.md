@@ -2,6 +2,36 @@
 
 -----------------
 
+## 0.9.11 (2017 Feb 04)
+
+### Release Notes
+
+* Log buffer max size, and proper "overflow" handling (#7)
+
+### Install or upgrade
+
+To install this version, run the following commands (in a bash shell):
+
+```
+curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/0.9.11/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+```
+
+Then:
+
+```
+chmod +x /usr/local/bin/bitrise-machine
+```
+
+That's all, you're ready to call `bitrise-machine`!
+
+### Release Commits - 0.9.10 -> 0.9.11
+
+* [d4653e6] Viktor Benei - 0.9.11 (2017 Feb 04)
+* [4ed94ea] Viktor Benei - Log buffer max size, and proper "overflow" handling (#7) (2017 Feb 04)
+* [ba335c6] Viktor Benei - bitrise.yml normalized by workflow editor (2017 Feb 03)
+* [081d8c1] Viktor Benei - go deps update (#6) (2017 Feb 03)
+
+
 ## 0.9.10 (2016 Nov 16)
 
 ### Release Notes
@@ -384,4 +414,4 @@ That's all, you're ready to call `bitrise-machine`!
 
 -----------------
 
-Generated at: 2016 Nov 16
+Generated at: 2017 Feb 04
