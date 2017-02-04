@@ -70,6 +70,14 @@ workflows:
                 exit 1
               fi
             done <<< "$GOLIST_WITHOUT_VENDOR"
+    - script:
+        title: Go race detector
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            # see: https://golang.org/doc/articles/race_detector.html
+            go build -race -o ./_tmp/bitrise-machine
   ci:
     before_run:
     - _install_test_tools
