@@ -59,7 +59,7 @@ func (buff *LogBuffer) Write(p []byte) (n int, err error) {
 		// log buffer overflow
 		if !buff.isLogBufferOverflowReported {
 			// report it once in the bitrise-machine log
-			log.Error(" [!] Exception: Log Buffer Overflow: ignoring new write")
+			log.Error(" [!] Exception: Log Buffer Overflow: ignoring new writes temporarily")
 			buff.isLogBufferOverflowReported = true
 		}
 
