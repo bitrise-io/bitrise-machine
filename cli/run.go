@@ -60,7 +60,7 @@ func (buff *LogBuffer) Write(p []byte) (n int, err error) {
 		if !buff.isLogBufferOverflowReported {
 			// report it once in the bitrise-machine log
 			buff.isLogBufferOverflowReported = true
-			log.Error(" [!] Exception: Log Buffer Overflow: ignoring new writes temporarily")
+			log.Error(" (!) WARNING: Log Buffer Overflow: ignoring new writes temporarily")
 		}
 
 		timeDiffSec := time.Now().Sub(buff.lastLogBufferOverflowReportedAt).Seconds()
