@@ -21,7 +21,7 @@ import (
 
 const (
 	logChunkRuneLenght         = 10 * 1000        // ~ 10 KB
-	maxLogBufferRuneLength     = 10 * 1000 * 1000 // ~ 10 MB
+	maxLogBufferRuneLength     = 20 * 1000 * 1000 // ~ 20 MB
 	abortCheckFrequencySeconds = 10.0
 
 	buildFinishedWithErrorExitCode    = 10
