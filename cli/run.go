@@ -21,7 +21,7 @@ import (
 
 const (
 	logChunkRuneLenght         = 10 * 1000        // ~ 10 KB
-	maxLogBufferRuneLength     = 20 * 1000 * 1000 // ~ 20 MB
+	maxLogBufferSize           = 20 * 1000 * 1000 // ~ 20 MB
 	abortCheckFrequencySeconds = 10.0
 
 	buildFinishedWithErrorExitCode    = 10
@@ -55,7 +55,7 @@ func (buff *LogBuffer) Write(p []byte) (n int, err error) {
 	buff.rwlock.Lock()
 	defer buff.rwlock.Unlock()
 
-	if buff.logBytes.Len() > maxLogBufferRuneLength {
+	if buff.logBytes.Len() > maxLogBufferSize {
 		// log buffer overflow
 		if !buff.isLogBufferOverflowReported {
 			// report it once in the bitrise-machine log
@@ -287,6 +287,7 @@ func performRun(sshConfig config.SSHConfigModel, commandToRunStr string,
 		log.Debugf("==> Result: %#v | err: %s", abortCheckModel, jsonErr)
 
 		if jsonErr == nil && abortCheckModel.StatusStr == "ok" && abortCheckModel.IsAborted {
+			log.Println("=> Abort received")
 			runRes = RunResults{RunError: fmt.Errorf("Build was aborted"), IsUserRequestedAbort: true}
 			isRunFinished = true
 		}
@@ -295,10 +296,12 @@ func performRun(sshConfig config.SSHConfigModel, commandToRunStr string,
 	for !isRunFinished {
 		select {
 		case res := <-c1:
+			log.Println("=> Command Finished")
 			runRes = res
 			runningCommand = nil
 			isRunFinished = true
 		case <-timeoutTriggerred:
+			log.Println("=> Command Timeout")
 			runRes = RunResults{RunError: fmt.Errorf("Timeout after %d seconds", timeoutSeconds), IsTimeoutError: true}
 			isRunFinished = true
 		case <-time.Tick(500 * time.Millisecond):
@@ -312,12 +315,16 @@ func performRun(sshConfig config.SSHConfigModel, commandToRunStr string,
 	// processing the remaining chunks of the log,
 	// so that no new log is added to the buffer
 	if runningCommand != nil {
+		log.Println("=> Aborting the command ...")
 		if err := runningCommand.Process.Kill(); err != nil {
 			log.Errorf("Failed to abort command, error: %s", err)
 		}
+		log.Println("=> Aborting the command - [DONE]")
 	}
 
+	log.Println("=> Processing remaining logs from log buffer ...")
 	processLogs(true)
+	log.Println("=> Processing remaining logs from log buffer - [DONE]")
 	printLogSummary(logChunkIndex)
 
 	return runRes
