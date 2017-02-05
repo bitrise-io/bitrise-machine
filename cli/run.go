@@ -21,7 +21,7 @@ import (
 
 const (
 	logChunkRuneLenght         = 10 * 1000        // ~ 10 KB
-	maxLogBufferRuneLength     = 10 * 1000 * 1000 // ~ 10 MB
+	maxLogBufferRuneLength     = 20 * 1000 * 1000 // ~ 20 MB
 	abortCheckFrequencySeconds = 10.0
 
 	buildFinishedWithErrorExitCode    = 10
@@ -60,7 +60,7 @@ func (buff *LogBuffer) Write(p []byte) (n int, err error) {
 		if !buff.isLogBufferOverflowReported {
 			// report it once in the bitrise-machine log
 			buff.isLogBufferOverflowReported = true
-			log.Error(" [!] Exception: Log Buffer Overflow: ignoring new writes temporarily")
+			log.Error(" (!) WARNING: Log Buffer Overflow: ignoring new writes temporarily")
 		}
 
 		timeDiffSec := time.Now().Sub(buff.lastLogBufferOverflowReportedAt).Seconds()
