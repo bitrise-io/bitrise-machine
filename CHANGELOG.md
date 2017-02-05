@@ -2,6 +2,36 @@
 
 -----------------
 
+## 0.9.12 (2017 Feb 05)
+
+### Release Notes
+
+* Max log buffer size doubled
+* A couple of logging changes / revs
+
+### Install or upgrade
+
+To install this version, run the following commands (in a bash shell):
+
+```
+curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/0.9.12/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+```
+
+Then:
+
+```
+chmod +x /usr/local/bin/bitrise-machine
+```
+
+That's all, you're ready to call `bitrise-machine`!
+
+### Release Commits - 0.9.11 -> 0.9.12
+
+* [e8b4cff] Viktor Benei - 0.9.12 (2017 Feb 05)
+* [5054e37] Viktor Benei - bit of additional logging with time stamps (#9) (2017 Feb 05)
+* [c6b4d55] Viktor Benei - Feature/log buffer max size bump and lot rev (#8) (2017 Feb 05)
+
+
 ## 0.9.11 (2017 Feb 04)
 
 ### Release Notes
@@ -414,4 +444,4 @@ That's all, you're ready to call `bitrise-machine`!
 
 -----------------
 
-Generated at: 2017 Feb 04
+Generated at: 2017 Feb 05
