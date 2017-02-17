@@ -9,12 +9,12 @@ import (
 )
 
 // RunAndReturnCombinedOutput ...
-func RunAndReturnCombinedOutput(dir string, envs []string, name string, args ...string) (string, error) {
+func RunAndReturnCombinedOutput(dir string, additionalCmdEnvs []string, name string, args ...string) (string, error) {
 	cmd := exec.Command(name, args...)
 	if dir != "" {
 		cmd.Dir = dir
 	}
-	cmd.Env = append(os.Environ(), envs...)
+	cmd.Env = append(os.Environ(), additionalCmdEnvs...)
 	outBytes, err := cmd.CombinedOutput()
 
 	if err != nil {
@@ -27,12 +27,12 @@ func RunAndReturnCombinedOutput(dir string, envs []string, name string, args ...
 }
 
 // Run ...
-func Run(dir string, envs []string, name string, args ...string) error {
+func Run(dir string, additionalCmdEnvs []string, name string, args ...string) error {
 	cmd := exec.Command(name, args...)
 	if dir != "" {
 		cmd.Dir = dir
 	}
-	cmd.Env = append(os.Environ(), envs...)
+	cmd.Env = append(os.Environ(), additionalCmdEnvs...)
 	cmd.Stdin = nil
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
