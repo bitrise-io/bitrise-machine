@@ -120,23 +120,24 @@ func doCleanup(configModel config.MachineConfigModel, isSkipHostCleanup string) 
 	log.Infof("==> doCleanup (mode: %s)", configModel.CleanupMode)
 
 	if isSkipHostCleanup != "will-be-destroyed" {
-		if configModel.CleanupMode == config.CleanupModeRollback {
+		switch configModel.CleanupMode {
+		case config.CleanupModeRollback:
 			if err := utils.Run(MachineWorkdir.Get(), configModel.AllCmdEnvsForConfigType(MachineConfigTypeID.Get()), "vagrant", "snapshot", "pop", "--no-delete"); err != nil {
 				return err
 			}
-		} else if configModel.CleanupMode == config.CleanupModeRecreate {
+		case config.CleanupModeRecreate:
 			if err := doRecreateCleanup(configModel); err != nil {
 				return err
 			}
-		} else if configModel.CleanupMode == config.CleanupModeDestroy {
+		case config.CleanupModeDestroy:
 			if err := doDestroyCleanup(configModel); err != nil {
 				return err
 			}
-		} else if configModel.CleanupMode == config.CleanupModeCustomCommand {
+		case config.CleanupModeCustomCommand:
 			if err := doCustomCleanup(configModel); err != nil {
 				return err
 			}
-		} else {
+		default:
 			return fmt.Errorf("Unsupported CleanupMode: %s", configModel.CleanupMode)
 		}
 	} else {
