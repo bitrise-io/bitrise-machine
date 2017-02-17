@@ -2,10 +2,12 @@ package vagrant
 
 import (
 	"bufio"
+	"fmt"
 	"strconv"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/bitrise-tools/bitrise-machine/utils"
 )
 
 // MachineReadableItem - you can find more information
@@ -49,4 +51,12 @@ func ParseMachineReadableItemsFromString(str, targetFilter, typeFilter string) [
 		res = append(res, MachineReadableItem{time, targetStr, typeStr, dataStr})
 	}
 	return res
+}
+
+// Up ...
+func Up(workdirPth string, envs []string) error {
+	if err := utils.Run(workdirPth, envs, "vagrant", "up"); err != nil {
+		return fmt.Errorf("Command 'vagrant up' failed with error: %s", err)
+	}
+	return nil
 }

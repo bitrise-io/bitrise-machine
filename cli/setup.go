@@ -8,6 +8,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-tools/bitrise-machine/config"
+	"github.com/bitrise-tools/bitrise-machine/session"
 	"github.com/bitrise-tools/bitrise-machine/utils"
 	"github.com/urfave/cli"
 )
@@ -101,8 +102,19 @@ func doCreateIfRequired(configModel config.MachineConfigModel) error {
 	if machineStatus.Type == "state" && machineStatus.Data == "not_created" {
 		log.Infoln("Machine not yet created - creating with 'vagrant up'...")
 
-		if err := utils.Run(MachineWorkdir.Get(), configModel.AllCmdEnvsForConfigType(MachineConfigTypeID.Get()), "vagrant", "up"); err != nil {
-			return fmt.Errorf("'vagrant up' failed with error: %s", err)
+		sessionStore := session.StoreModel{}
+		if session.IsSessionSupportedForCleanupType(configModel.CleanupMode) {
+			sessStore, err := session.Start(MachineWorkdir.Get())
+			if err != nil {
+				return fmt.Errorf("Failed to start Session, error: %s", err)
+			}
+			sessionStore = sessStore
+		} else {
+			log.Infof(" (i) Session handling is not supported for cleanup type: %s", configModel.CleanupMode)
+		}
+
+		if err := vagrantUp(configModel, sessionStore); err != nil {
+			return fmt.Errorf("doCreateIfRequired: Failed to vagrant up, error: %s", err)
 		}
 
 		log.Infoln("Machine created!")
