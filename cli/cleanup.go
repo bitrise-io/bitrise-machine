@@ -4,18 +4,16 @@ import (
 	"errors"
 	"fmt"
 
-	log "github.com/Sirupsen/logrus"
+	"github.com/Sirupsen/logrus"
 	"github.com/bitrise-tools/bitrise-machine/config"
-	"github.com/bitrise-tools/bitrise-machine/utils"
+	"github.com/bitrise-tools/bitrise-machine/session"
 	"github.com/bitrise-tools/bitrise-machine/vagrant"
 	"github.com/urfave/cli"
 )
 
-func getVagrantStatus(configModel config.MachineConfigModel) (vagrant.MachineReadableItem, error) {
+func getVagrantStatus(configModel config.MachineConfigModel, sessionStore session.StoreModel) (vagrant.MachineReadableItem, error) {
 	// Read `vagrant status` log/output
-	outputs, err := utils.RunAndReturnCombinedOutput(MachineWorkdir.Get(),
-		configModel.AllCmdEnvsForConfigType(MachineConfigTypeID.Get()),
-		"vagrant", "status", "--machine-readable")
+	outputs, err := runVagrantCommandAndReturnCombinedOutput(configModel, sessionStore, "status", "--machine-readable")
 	if err != nil {
 		return vagrant.MachineReadableItem{}, fmt.Errorf("'vagrant status' failed. Output was: %s", outputs)
 	}
@@ -26,121 +24,130 @@ func getVagrantStatus(configModel config.MachineConfigModel) (vagrant.MachineRea
 	return statusItms[0], nil
 }
 
-// destroyCommon ...
+// cleanupDestroyCommon ...
 //  common code, cleanup's destroy
-func destroyCommon(configModel config.MachineConfigModel) error {
-	machineStatus, err := getVagrantStatus(configModel)
+func cleanupDestroyCommon(configModel config.MachineConfigModel, sessionStore session.StoreModel) error {
+	machineStatus, err := getVagrantStatus(configModel, sessionStore)
 	if err != nil {
 		return fmt.Errorf("Failed to get vagrant status: %s", err)
 	}
 
 	if machineStatus.Data != "not_created" {
 		// destroy
-		log.Infoln("Destroying machine...")
-		if err := doDestroy(configModel); err != nil {
+		logrus.Infoln("Destroying machine...")
+		if err := doDestroy(configModel, sessionStore); err != nil {
 			return fmt.Errorf("'vagrant destroy' failed with error: %s", err)
 		}
-		log.Infoln("Machine destroyed.")
+		logrus.Infoln("Machine destroyed.")
 	} else {
-		log.Infoln("Machine is in not-created state, skipping destroy.")
+		logrus.Infoln("Machine is in not-created state, skipping destroy.")
 	}
 
 	return nil
 }
 
-func doRecreateCleanup(configModel config.MachineConfigModel) error {
+func doRecreateCleanup(configModel config.MachineConfigModel, previousSession session.StoreModel) (session.StoreModel, error) {
 	// destroy
-	if err := destroyCommon(configModel); err != nil {
-		return fmt.Errorf("doRecreateCleanup: failed to destroy: %s", err)
+	if err := cleanupDestroyCommon(configModel, previousSession); err != nil {
+		return previousSession, fmt.Errorf("doRecreateCleanup: failed to destroy: %s", err)
 	}
 
 	// re-create
-	if err := utils.Run(MachineWorkdir.Get(), configModel.AllCmdEnvsForConfigType(MachineConfigTypeID.Get()), "vagrant", "up"); err != nil {
-		return fmt.Errorf("'vagrant up' failed with error: %s", err)
+	sessionStore, err := vagrantUpAndSessionInit(configModel)
+	if err != nil {
+		return sessionStore, fmt.Errorf("'vagrant up' failed with error: %s", err)
 	}
 
-	log.Infoln("Machine created and ready!")
-	return nil
+	logrus.Infoln("Machine created and ready!")
+	return sessionStore, nil
 }
 
-func doDestroyCleanup(configModel config.MachineConfigModel) error {
+func doDestroyCleanup(configModel config.MachineConfigModel, sessionStore session.StoreModel) error {
 	// destroy
-	if err := destroyCommon(configModel); err != nil {
-		return fmt.Errorf("doRecreateCleanup: failed to destroy: %s", err)
+	if err := cleanupDestroyCommon(configModel, sessionStore); err != nil {
+		return fmt.Errorf("doDestroyCleanup: failed to destroy: %s", err)
 	}
 
-	log.Infoln("Machine destroyed, clean!")
+	logrus.Infoln("Machine destroyed, clean!")
 	return nil
 }
 
-func doCustomCleanup(configModel config.MachineConfigModel) error {
-	log.Infoln("Cleanup mode: custom-command")
+func doCustomCleanup(configModel config.MachineConfigModel, previousSession session.StoreModel) (session.StoreModel, error) {
+	logrus.Infoln("Cleanup mode: custom-command")
 	if configModel.CustomCleanupCommand == "" {
-		return errors.New("cleanup mode was custom-command, but no custom cleanup command specified")
+		return previousSession, errors.New("cleanup mode was custom-command, but no custom cleanup command specified")
 	}
-	log.Infof("=> Specified custom command: %s", configModel.CustomCleanupCommand)
+	logrus.Infof("=> Specified custom command: %s", configModel.CustomCleanupCommand)
 
 	// Read `vagrant status` log/output
 	machineStatus := vagrant.MachineReadableItem{}
-	if outputs, err := utils.RunAndReturnCombinedOutput(MachineWorkdir.Get(), configModel.AllCmdEnvsForConfigType(MachineConfigTypeID.Get()), "vagrant", "status", "--machine-readable"); err != nil {
+	if outputs, err := runVagrantCommandAndReturnCombinedOutput(configModel, previousSession, "status", "--machine-readable"); err != nil {
 		if err != nil {
-			log.Errorf("'vagrant status' failed with output: %s", outputs)
-			return err
+			logrus.Errorf("'vagrant status' failed with output: %s", outputs)
+			return previousSession, err
 		}
 	} else {
 		statusItms := vagrant.ParseMachineReadableItemsFromString(outputs, "", "state")
 		if len(statusItms) != 1 {
-			return fmt.Errorf("Failed to determine the 'status' of the machine. Output was: %s", outputs)
+			return previousSession, fmt.Errorf("Failed to determine the 'status' of the machine. Output was: %s", outputs)
 		}
 		machineStatus = statusItms[0]
 	}
 
+	sessionStore := previousSession
 	if machineStatus.Data == "not_created" {
-		log.Infoln("Machine not yet created - creating with 'vagrant up'...")
-		if err := utils.Run(MachineWorkdir.Get(), configModel.AllCmdEnvsForConfigType(MachineConfigTypeID.Get()), "vagrant", "up"); err != nil {
-			return fmt.Errorf("'vagrant up' failed with error: %s", err)
+		logrus.Infoln("Machine not yet created - creating with 'vagrant up'...")
+		sessStore, err := vagrantUpAndSessionInit(configModel)
+		if err != nil {
+			return sessStore, fmt.Errorf("'vagrant up' failed with error: %s", err)
 		}
-		log.Infoln("Machine created!")
+		sessionStore = sessStore
+		logrus.Infoln("Machine created!")
 	} else {
-		log.Infof("Machine already created - using the specified custom-command (%s) to clean it up...", configModel.CustomCleanupCommand)
-		if err := utils.Run(MachineWorkdir.Get(), configModel.AllCmdEnvsForConfigType(MachineConfigTypeID.Get()), "vagrant", configModel.CustomCleanupCommand); err != nil {
-			return fmt.Errorf("'vagrant %s' failed with error: %s", configModel.CustomCleanupCommand, err)
+		logrus.Infof("Machine already created - using the specified custom-command (%s) to clean it up...", configModel.CustomCleanupCommand)
+		if err := runVagrantCommand(configModel, previousSession, configModel.CustomCleanupCommand); err != nil {
+			return previousSession, fmt.Errorf("'vagrant %s' failed with error: %s", configModel.CustomCleanupCommand, err)
 		}
-		log.Infoln("Successful custom cleanup")
+		logrus.Infoln("Successful custom cleanup")
 	}
 
-	log.Infoln("Machine created and ready!")
-	return nil
+	logrus.Infoln("Machine created and ready!")
+	return sessionStore, nil
 }
 
 // doCleanup ...
 // @isSkipHostCleanup : !!! should only be specified in case the host will be destroyed right after
 //   the cleanup. 'will-be-destroyed' will leave the host as-it-is, uncleared!!
-func doCleanup(configModel config.MachineConfigModel, isSkipHostCleanup string) error {
-	log.Infof("==> doCleanup (mode: %s)", configModel.CleanupMode)
+func doCleanup(configModel config.MachineConfigModel, isSkipHostCleanup string, sessionStore session.StoreModel) error {
+	logrus.Infof("==> doCleanup (mode: %s)", configModel.CleanupMode)
 
 	if isSkipHostCleanup != "will-be-destroyed" {
-		if configModel.CleanupMode == config.CleanupModeRollback {
-			if err := utils.Run(MachineWorkdir.Get(), configModel.AllCmdEnvsForConfigType(MachineConfigTypeID.Get()), "vagrant", "snapshot", "pop", "--no-delete"); err != nil {
+		switch configModel.CleanupMode {
+		case config.CleanupModeRollback:
+			if err := runVagrantCommand(configModel, sessionStore, "snapshot", "pop", "--no-delete"); err != nil {
 				return err
 			}
-		} else if configModel.CleanupMode == config.CleanupModeRecreate {
-			if err := doRecreateCleanup(configModel); err != nil {
+		case config.CleanupModeRecreate:
+			sessStore, err := doRecreateCleanup(configModel, sessionStore)
+			if err != nil {
 				return err
 			}
-		} else if configModel.CleanupMode == config.CleanupModeDestroy {
-			if err := doDestroyCleanup(configModel); err != nil {
+			sessionStore = sessStore
+		case config.CleanupModeDestroy:
+			if err := doDestroyCleanup(configModel, sessionStore); err != nil {
 				return err
 			}
-		} else if configModel.CleanupMode == config.CleanupModeCustomCommand {
-			if err := doCustomCleanup(configModel); err != nil {
+		case config.CleanupModeCustomCommand:
+			sessStore, err := doCustomCleanup(configModel, sessionStore)
+			if err != nil {
 				return err
 			}
-		} else {
+			sessionStore = sessStore
+		default:
 			return fmt.Errorf("Unsupported CleanupMode: %s", configModel.CleanupMode)
 		}
 	} else {
-		log.Warnln("Skipping Host Cleanup! This option should only be used if the Host is destroyed immediately after this cleanup!!")
+		logrus.Warnln("Skipping Host Cleanup! This option should only be used if the Host is destroyed immediately after this cleanup!!")
 	}
 
 	if err := config.DeleteSSHFilesFromDir(MachineWorkdir.Get()); err != nil {
@@ -151,24 +158,33 @@ func doCleanup(configModel config.MachineConfigModel, isSkipHostCleanup string) 
 }
 
 func cleanup(c *cli.Context) {
-	log.Infoln("Cleanup")
+	logrus.Infoln("Cleanup")
+
+	// --- Configs and inputs
 
 	additionalEnvs, err := config.CreateEnvItemsModelFromSlice(MachineParamsAdditionalEnvs.Get())
 	if err != nil {
-		log.Fatalf("Invalid Environment parameter: %s", err)
+		logrus.Fatalf("Invalid Environment parameter: %s", err)
 	}
-	log.Debugf("additionalEnvs: %#v", additionalEnvs)
+	logrus.Debugf("additionalEnvs: %#v", additionalEnvs)
 
 	configModel, err := config.ReadMachineConfigFileFromDir(MachineWorkdir.Get(), additionalEnvs)
 	if err != nil {
-		log.Fatalln("Failed to read Config file: ", err)
+		logrus.Fatalln("Failed to read Config file: ", err)
 	}
 
-	log.Infof("configModel: %#v", configModel)
+	logrus.Infof("configModel: %#v", configModel)
 
-	if err := doCleanup(configModel, ""); err != nil {
-		log.Fatalf("Failed to Cleanup: %s", err)
+	sessionStore, err := loadSessionIfSupportedAndExists(configModel.CleanupMode)
+	if err != nil {
+		logrus.Fatalf("Failed to load session, error: %s", err)
 	}
 
-	log.Infoln("Cleanup - DONE - OK")
+	// ---
+
+	if err := doCleanup(configModel, "", sessionStore); err != nil {
+		logrus.Fatalf("Failed to Cleanup: %s", err)
+	}
+
+	logrus.Infoln("Cleanup - DONE - OK")
 }
