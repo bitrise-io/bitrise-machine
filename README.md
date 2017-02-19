@@ -43,6 +43,10 @@ a setup and a destroy, so the session time id will be the same
 during `bitrise-machine setup` and the following `bitrise-machine destroy/cleanup`,
 and will be re-generated at the next "vagrant up".
 
+This session time id can be used to e.g. include it in the Virtual Machine ID,
+to help with unique ID generation, as the ID will be kept from "vagrant up"
+to "vagrant destroy", and the next "vagrant up" will generate a new session (time id).
+
 The environment variable is: `BITRISE_MACHINE_SESSION_TIME_ID`
 
 Format: `YYYYMMDDHHMMSS`
