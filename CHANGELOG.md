@@ -2,6 +2,44 @@
 
 -----------------
 
+## 0.9.13 (2017 Feb 19)
+
+### Release Notes
+
+Session handling for `destroy` and `recreate` cleanup modes.
+
+TL;DR;
+
+Bitrise Machine exposes a "session time id" as an environment variable,
+which can be used in the Vagrantfile.
+
+This session time id can be used to e.g. include it in the Virtual Machine ID,
+to help with unique ID generation, as the ID will be kept from "vagrant up"
+to "vagrant destroy", and the next "vagrant up" will generate a new session (time id).
+
+_For more info see the README._
+
+### Install or upgrade
+
+To install this version, run the following commands (in a bash shell):
+
+```
+curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/0.9.13/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+```
+
+Then:
+
+```
+chmod +x /usr/local/bin/bitrise-machine
+```
+
+That's all, you're ready to call `bitrise-machine`!
+
+### Release Commits - 0.9.12 -> 0.9.13
+
+* [ee305bd] Viktor Benei - Feature/session handling (#10) (2017 Feb 19)
+
+
 ## 0.9.12 (2017 Feb 05)
 
 ### Release Notes
@@ -444,4 +482,4 @@ That's all, you're ready to call `bitrise-machine`!
 
 -----------------
 
-Generated at: 2017 Feb 05
+Generated at: 2017 Feb 19
