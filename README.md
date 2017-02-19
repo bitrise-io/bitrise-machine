@@ -13,9 +13,7 @@ you should change the Cleanup Mode in the config!
 
 - `rollback` : runs `vagrant snapshot pop` to clean up
     - __requires__ at least `vagrant` v1.8.0
-    - SESSION: partial session support, initializes the session when the VM is created,
-      it does not end or start a new session when a simple cleanup/rollback happens,
-      only when the VM is actually re-created (e.g. after a destroy)
+    - SESSION: NOT SUPPORTED
 - `recreate` : runs `vagrant destroy -f` and then `vagrant up` to clean up
     - `bitrise-machine cleanup` is the same as `bitrise-machine destroy && bitrise-machine setup`
     - SESSION: full session handling support, init session when VM created
@@ -29,9 +27,7 @@ you should change the Cleanup Mode in the config!
       For example the [vagrant-digitalocean](https://github.com/smdahlen/vagrant-digitalocean) plugin adds
       a `rebuild` command to `vagrant` and makes a cleanup / re-build faster than
       re-creating the Virtual Machine with `vagrant destroy` and `vagrant up`.
-    - SESSION: partial session support, initializes the session when the VM is created,
-      it does not end or start a new session when a simple cleanup/rollback happens,
-      only when the VM is actually re-created (e.g. after a destroy)
+    - SESSION: NOT SUPPORTED
 
 ## Session
 
