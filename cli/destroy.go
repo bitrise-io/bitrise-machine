@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"path"
 
-	log "github.com/Sirupsen/logrus"
+	"github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-tools/bitrise-machine/config"
-	"github.com/bitrise-tools/bitrise-machine/utils"
+	"github.com/bitrise-tools/bitrise-machine/session"
 	"github.com/urfave/cli"
 )
 
-func doDestroy(configModel config.MachineConfigModel) error {
-	log.Infoln("==> doDestroy")
+func doDestroy(configModel config.MachineConfigModel, sessionStore session.StoreModel) error {
+	logrus.Infoln("==> doDestroy")
 
-	if err := utils.Run(MachineWorkdir.Get(), configModel.AllCmdEnvsForConfigType(MachineConfigTypeID.Get()), "vagrant", "destroy", "-f"); err != nil {
+	if err := runVagrantCommand(configModel, sessionStore, "destroy", "-f"); err != nil {
 		return fmt.Errorf("'vagrant destroy' failed with error: %s", err)
 	}
 
@@ -22,35 +22,44 @@ func doDestroy(configModel config.MachineConfigModel) error {
 }
 
 func destroy(c *cli.Context) {
-	log.Infoln("Destroy")
+	logrus.Infoln("Destroy")
+
+	// --- Configs and inputs
 
 	additionalEnvs, err := config.CreateEnvItemsModelFromSlice(MachineParamsAdditionalEnvs.Get())
 	if err != nil {
-		log.Fatalf("Invalid Environment parameter: %s", err)
+		logrus.Fatalf("Invalid Environment parameter: %s", err)
 	}
 
 	configModel, err := config.ReadMachineConfigFileFromDir(MachineWorkdir.Get(), additionalEnvs)
 	if err != nil {
-		log.Fatalln("Failed to read Config file: ", err)
+		logrus.Fatalln("Failed to read Config file: ", err)
 	}
 
 	isOK, err := pathutil.IsPathExists(path.Join(MachineWorkdir.Get(), "Vagrantfile"))
 	if err != nil {
-		log.Fatalln("Failed to check 'Vagrantfile' in the WorkDir: ", err)
+		logrus.Fatalln("Failed to check 'Vagrantfile' in the WorkDir: ", err)
 	}
 	if !isOK {
-		log.Fatalln("Vagrantfile not found in the WorkDir!")
+		logrus.Fatalln("Vagrantfile not found in the WorkDir!")
 	}
 
-	log.Infof("configModel: %#v", configModel)
+	logrus.Infof("configModel: %#v", configModel)
 
-	if err := doCleanup(configModel, "will-be-destroyed"); err != nil {
-		log.Fatalf("Failed to Cleanup: %s", err)
+	sessionStore, err := loadSessionIfSupportedAndExists(configModel.CleanupMode)
+	if err != nil {
+		logrus.Fatalf("Failed to load session, error: %s", err)
 	}
 
-	if err := doDestroy(configModel); err != nil {
-		log.Fatalf("Failed to Destroy: %s", err)
+	// ---
+
+	if err := doCleanup(configModel, "will-be-destroyed", sessionStore); err != nil {
+		logrus.Fatalf("Failed to Cleanup: %s", err)
 	}
 
-	log.Infoln("=> Destroy DONE - OK")
+	if err := doDestroy(configModel, sessionStore); err != nil {
+		logrus.Fatalf("Failed to Destroy: %s", err)
+	}
+
+	logrus.Infoln("=> Destroy DONE - OK")
 }

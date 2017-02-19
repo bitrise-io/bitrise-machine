@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/bitrise-io/go-utils/fileutil"
+	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-tools/bitrise-machine/config"
 )
 
@@ -94,14 +95,24 @@ func Start(workdirPth string) (StoreModel, error) {
 // IsSessionSupportedForCleanupType ...
 func IsSessionSupportedForCleanupType(cleanupType string) bool {
 	switch cleanupType {
-	case config.CleanupModeRollback:
-		return false
 	case config.CleanupModeRecreate:
 		return true
 	case config.CleanupModeDestroy:
 		return true
-	case config.CleanupModeCustomCommand:
-		return false
 	}
 	return false
+}
+
+// IsSessionStoreFileExists ...
+func IsSessionStoreFileExists(workdirPth string) (bool, error) {
+	sessionStoreFilePth := filepath.Join(workdirPth, machineSessionFileName)
+	return pathutil.IsPathExists(sessionStoreFilePth)
+}
+
+// Load ...
+func Load(workdirPth string, cleanupType string) (StoreModel, error) {
+	if !IsSessionSupportedForCleanupType(cleanupType) {
+		return StoreModel{}, fmt.Errorf("Session Store is not supported for cleanup type: %s", cleanupType)
+	}
+	return readStoreFileFromDir(workdirPth)
 }
