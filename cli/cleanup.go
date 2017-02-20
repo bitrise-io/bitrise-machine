@@ -118,43 +118,44 @@ func doCustomCleanup(configModel config.MachineConfigModel, previousSession sess
 // doCleanup ...
 // @isSkipHostCleanup : !!! should only be specified in case the host will be destroyed right after
 //   the cleanup. 'will-be-destroyed' will leave the host as-it-is, uncleared!!
-func doCleanup(configModel config.MachineConfigModel, isSkipHostCleanup string, sessionStore session.StoreModel) error {
+func doCleanup(configModel config.MachineConfigModel, isSkipHostCleanup string, prevSession session.StoreModel) (session.StoreModel, error) {
 	logrus.Infof("==> doCleanup (mode: %s)", configModel.CleanupMode)
 
+	sessionStore := prevSession
 	if isSkipHostCleanup != "will-be-destroyed" {
 		switch configModel.CleanupMode {
 		case config.CleanupModeRollback:
-			if err := runVagrantCommand(configModel, sessionStore, "snapshot", "pop", "--no-delete"); err != nil {
-				return err
+			if err := runVagrantCommand(configModel, prevSession, "snapshot", "pop", "--no-delete"); err != nil {
+				return prevSession, err
 			}
 		case config.CleanupModeRecreate:
-			sessStore, err := doRecreateCleanup(configModel, sessionStore)
+			sessStore, err := doRecreateCleanup(configModel, prevSession)
 			if err != nil {
-				return err
+				return prevSession, err
 			}
 			sessionStore = sessStore
 		case config.CleanupModeDestroy:
-			if err := doDestroyCleanup(configModel, sessionStore); err != nil {
-				return err
+			if err := doDestroyCleanup(configModel, prevSession); err != nil {
+				return prevSession, err
 			}
 		case config.CleanupModeCustomCommand:
-			sessStore, err := doCustomCleanup(configModel, sessionStore)
+			sessStore, err := doCustomCleanup(configModel, prevSession)
 			if err != nil {
-				return err
+				return prevSession, err
 			}
 			sessionStore = sessStore
 		default:
-			return fmt.Errorf("Unsupported CleanupMode: %s", configModel.CleanupMode)
+			return prevSession, fmt.Errorf("Unsupported CleanupMode: %s", configModel.CleanupMode)
 		}
 	} else {
 		logrus.Warnln("Skipping Host Cleanup! This option should only be used if the Host is destroyed immediately after this cleanup!!")
 	}
 
 	if err := config.DeleteSSHFilesFromDir(MachineWorkdir.Get()); err != nil {
-		return fmt.Errorf("Failed to delete SSH file from workdir: %s", err)
+		return sessionStore, fmt.Errorf("Failed to delete SSH file from workdir: %s", err)
 	}
 
-	return nil
+	return sessionStore, nil
 }
 
 func cleanup(c *cli.Context) {
@@ -182,8 +183,10 @@ func cleanup(c *cli.Context) {
 
 	// ---
 
-	if err := doCleanup(configModel, "", sessionStore); err != nil {
+	if sessStore, err := doCleanup(configModel, "", sessionStore); err != nil {
 		logrus.Fatalf("Failed to Cleanup: %s", err)
+	} else {
+		sessionStore = sessStore
 	}
 
 	logrus.Infoln("Cleanup - DONE - OK")

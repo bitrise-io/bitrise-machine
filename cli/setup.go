@@ -153,15 +153,17 @@ func setup(c *cli.Context) {
 
 	if !isSkipSetups {
 		// doCleanup
+		sessionStore := previousSession
 		if configModel.IsCleanupBeforeSetup {
-			if err := doCleanup(configModel, "", previousSession); err != nil {
+			if sessStore, err := doCleanup(configModel, "", sessionStore); err != nil {
 				logrus.Fatalf("Failed to Cleanup: %s", err)
+			} else {
+				sessionStore = sessStore
 			}
 		}
 
-		sessionStore := previousSession
 		if configModel.CleanupMode == config.CleanupModeDestroy || configModel.IsAllowVagrantCreateInSetup {
-			if sessStore, err := doCreateIfRequired(configModel, previousSession); err != nil {
+			if sessStore, err := doCreateIfRequired(configModel, sessionStore); err != nil {
 				logrus.Fatalf("Failed to Create the VM: %s", err)
 			} else {
 				// overwrite session with the new
