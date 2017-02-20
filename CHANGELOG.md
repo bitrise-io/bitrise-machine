@@ -2,6 +2,35 @@
 
 -----------------
 
+## 0.9.14 (2017 Feb 20)
+
+### Release Notes
+
+* Fixing a session handling bug for the `recreate` cleanup mode.
+  The bug does not affect you if you don't use the session time ID environment variable.
+
+
+### Install or upgrade
+
+To install this version, run the following commands (in a bash shell):
+
+```
+curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/0.9.14/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+```
+
+Then:
+
+```
+chmod +x /usr/local/bin/bitrise-machine
+```
+
+That's all, you're ready to call `bitrise-machine`!
+
+### Release Commits - 0.9.13 -> 0.9.14
+
+* [4496830] Viktor Benei - session handling fix for recreate cleanup mode (#11) (2017 Feb 20)
+
+
 ## 0.9.13 (2017 Feb 19)
 
 ### Release Notes
@@ -482,4 +511,4 @@ That's all, you're ready to call `bitrise-machine`!
 
 -----------------
 
-Generated at: 2017 Feb 19
+Generated at: 2017 Feb 20
