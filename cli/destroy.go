@@ -53,8 +53,10 @@ func destroy(c *cli.Context) {
 
 	// ---
 
-	if err := doCleanup(configModel, "will-be-destroyed", sessionStore); err != nil {
+	if sessStore, err := doCleanup(configModel, "will-be-destroyed", sessionStore); err != nil {
 		logrus.Fatalf("Failed to Cleanup: %s", err)
+	} else {
+		sessionStore = sessStore
 	}
 
 	if err := doDestroy(configModel, sessionStore); err != nil {
