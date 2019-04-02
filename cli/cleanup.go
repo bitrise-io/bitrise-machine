@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/bitrise-tools/bitrise-machine/config"
-	"github.com/bitrise-tools/bitrise-machine/session"
-	"github.com/bitrise-tools/bitrise-machine/vagrant"
+	"github.com/bitrise-io/bitrise-machine/config"
+	"github.com/bitrise-io/bitrise-machine/session"
+	"github.com/bitrise-io/bitrise-machine/vagrant"
 	"github.com/urfave/cli"
 )
 

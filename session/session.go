@@ -8,7 +8,7 @@ import (
 
 	"github.com/bitrise-io/go-utils/fileutil"
 	"github.com/bitrise-io/go-utils/pathutil"
-	"github.com/bitrise-tools/bitrise-machine/config"
+	"github.com/bitrise-io/bitrise-machine/config"
 )
 
 const (

@@ -12,7 +12,7 @@ import (
 	"golang.org/x/crypto/ssh"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/bitrise-tools/bitrise-machine/config"
+	"github.com/bitrise-io/bitrise-machine/config"
 )
 
 // StartAsyncCommandThroughSSHWithWriters ...

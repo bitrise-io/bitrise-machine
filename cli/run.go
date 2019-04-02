@@ -14,8 +14,8 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/go-utils/command"
-	"github.com/bitrise-tools/bitrise-machine/config"
-	"github.com/bitrise-tools/bitrise-machine/utils"
+	"github.com/bitrise-io/bitrise-machine/config"
+	"github.com/bitrise-io/bitrise-machine/utils"
 	"github.com/urfave/cli"
 )
 

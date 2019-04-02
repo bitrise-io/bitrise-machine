@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/bitrise-tools/bitrise-machine",
+	"ImportPath": "github.com/bitrise-io/bitrise-machine",
 	"GoVersion": "go1.7",
 	"GodepVersion": "v79",
 	"Packages": [

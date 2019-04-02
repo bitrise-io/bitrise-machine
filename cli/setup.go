@@ -7,9 +7,9 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/go-utils/pathutil"
-	"github.com/bitrise-tools/bitrise-machine/config"
-	"github.com/bitrise-tools/bitrise-machine/session"
-	"github.com/bitrise-tools/bitrise-machine/utils"
+	"github.com/bitrise-io/bitrise-machine/config"
+	"github.com/bitrise-io/bitrise-machine/session"
+	"github.com/bitrise-io/bitrise-machine/utils"
 	"github.com/urfave/cli"
 )
 

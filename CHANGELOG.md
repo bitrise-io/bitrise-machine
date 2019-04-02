@@ -15,7 +15,7 @@
 To install this version, run the following commands (in a bash shell):
 
 ```
-curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/0.9.14/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+curl -fL https://github.com/bitrise-io/bitrise-machine/releases/download/0.9.14/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
 ```
 
 Then:
@@ -53,7 +53,7 @@ _For more info see the README._
 To install this version, run the following commands (in a bash shell):
 
 ```
-curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/0.9.13/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+curl -fL https://github.com/bitrise-io/bitrise-machine/releases/download/0.9.13/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
 ```
 
 Then:
@@ -81,7 +81,7 @@ That's all, you're ready to call `bitrise-machine`!
 To install this version, run the following commands (in a bash shell):
 
 ```
-curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/0.9.12/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+curl -fL https://github.com/bitrise-io/bitrise-machine/releases/download/0.9.12/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
 ```
 
 Then:
@@ -110,7 +110,7 @@ That's all, you're ready to call `bitrise-machine`!
 To install this version, run the following commands (in a bash shell):
 
 ```
-curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/0.9.11/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+curl -fL https://github.com/bitrise-io/bitrise-machine/releases/download/0.9.11/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
 ```
 
 Then:
@@ -143,7 +143,7 @@ That's all, you're ready to call `bitrise-machine`!
 To install this version, run the following commands (in a bash shell):
 
 ```
-curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/0.9.10/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+curl -fL https://github.com/bitrise-io/bitrise-machine/releases/download/0.9.10/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
 ```
 
 Then:
@@ -173,7 +173,7 @@ That's all, you're ready to call `bitrise-machine`!
 To install this version, run the following commands (in a bash shell):
 
 ```
-curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/0.9.9/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+curl -fL https://github.com/bitrise-io/bitrise-machine/releases/download/0.9.9/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
 ```
 
 Then:
@@ -209,7 +209,7 @@ That's all, you're ready to call `bitrise-machine`!
 To install this version, run the following commands (in a bash shell):
 
 ```
-curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/0.9.8/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+curl -fL https://github.com/bitrise-io/bitrise-machine/releases/download/0.9.8/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
 ```
 
 Then:
@@ -251,7 +251,7 @@ That's all, you're ready to call `bitrise-machine`!
 To install this version, run the following commands (in a bash shell):
 
 ```
-curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/0.9.7/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+curl -fL https://github.com/bitrise-io/bitrise-machine/releases/download/0.9.7/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
 ```
 
 Then:
@@ -313,7 +313,7 @@ That's all, you're ready to call `bitrise-machine`!
 To install this version, run the following commands (in a bash shell):
 
 ```
-curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/0.9.6/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+curl -fL https://github.com/bitrise-io/bitrise-machine/releases/download/0.9.6/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
 ```
 
 Then:
@@ -356,7 +356,7 @@ you have to add the `--` separator: `bitrise-machine --workdir=... run -timeout=
 To install this version, run the following commands (in a bash shell):
 
 ```
-curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/0.9.5/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+curl -fL https://github.com/bitrise-io/bitrise-machine/releases/download/0.9.5/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
 ```
 
 Then:
@@ -394,7 +394,7 @@ That's all, you're ready to call `bitrise-machine`!
 To install this version, run the following commands (in a bash shell):
 
 ```
-curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/0.9.4/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+curl -fL https://github.com/bitrise-io/bitrise-machine/releases/download/0.9.4/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
 ```
 
 Then:
@@ -426,7 +426,7 @@ That's all, you're ready to call `bitrise-machine`!
 To install this version, run the following commands (in a bash shell):
 
 ```
-curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/0.9.3/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+curl -fL https://github.com/bitrise-io/bitrise-machine/releases/download/0.9.3/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
 ```
 
 Then:
@@ -463,7 +463,7 @@ That's all, you're ready to call `bitrise-machine`!
 To install this version, run the following commands (in a bash shell):
 
 ```
-curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/0.9.2/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+curl -fL https://github.com/bitrise-io/bitrise-machine/releases/download/0.9.2/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
 ```
 
 Then:
@@ -493,7 +493,7 @@ That's all, you're ready to call `bitrise-machine`!
 To install this version, run the following commands (in a bash shell):
 
 ```
-curl -fL https://github.com/bitrise-tools/bitrise-machine/releases/download/0.9.1/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
+curl -fL https://github.com/bitrise-io/bitrise-machine/releases/download/0.9.1/bitrise-machine-$(uname -s)-$(uname -m) > /usr/local/bin/bitrise-machine
 ```
 
 Then:

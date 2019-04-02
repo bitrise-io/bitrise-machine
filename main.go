@@ -2,7 +2,7 @@ package main
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"github.com/bitrise-tools/bitrise-machine/cli"
+	"github.com/bitrise-io/bitrise-machine/cli"
 )
 
 func init() {
